@@ -9,11 +9,16 @@ export default function RegisterScreen() {
   const [telefono, setTelefono] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false); // Estado para el checkbox
   const router = useRouter();
 
   const handleRegister = () => {
     if (!nombre || !telefono || !email || !password) {
       Alert.alert('Error', 'Por favor, completa todos los campos.');
+      return;
+    }
+    if (!acceptedTerms) {
+      Alert.alert('Error', 'Debes aceptar los términos y condiciones para registrarte.');
       return;
     }
     Alert.alert('Éxito', 'Registro exitoso.');
@@ -50,6 +55,15 @@ export default function RegisterScreen() {
         onChangeText={setPassword}
         secureTextEntry
       />
+      <View style={styles.checkboxContainer}>
+        <TouchableOpacity
+          style={[styles.checkbox, acceptedTerms && styles.checkboxChecked]}
+          onPress={() => setAcceptedTerms(!acceptedTerms)}
+        />
+        <Text style={styles.checkboxLabel}>
+          I accept the <Text style={styles.link}>Terms and Conditions</Text>
+        </Text>
+      </View>
       <TouchableOpacity style={styles.button} onPress={handleRegister}>
         <Text style={styles.buttonText}>Sign Up</Text>
       </TouchableOpacity>
@@ -84,6 +98,30 @@ const styles = StyleSheet.create({
     marginBottom: height * 0.02,
     fontSize: width * 0.045,
     color: '#000',
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: height * 0.02,
+  },
+  checkbox: {
+    width: width * 0.05,
+    height: width * 0.05,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    marginRight: width * 0.02,
+  },
+  checkboxChecked: {
+    backgroundColor: '#6A0DAD',
+  },
+  checkboxLabel: {
+    fontSize: width * 0.04,
+    color: '#000',
+  },
+  link: {
+    color: '#6A0DAD',
+    fontWeight: 'bold',
   },
   button: {
     backgroundColor: '#6A0DAD',
