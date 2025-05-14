@@ -1,28 +1,111 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Crypto from 'expo-crypto';
+import { useAuth } from '../../utils/context/authcontext';
 
 const { width, height } = Dimensions.get('window');
 
 export default function RegisterScreen() {
   const [nombre, setNombre] = useState('');
-  const [telefono, setTelefono] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [acceptedTerms, setAcceptedTerms] = useState(false); // Estado para el checkbox
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [isEmailValid, setIsEmailValid] = useState(true);
+  const [isPasswordMatch, setIsPasswordMatch] = useState(true);
   const router = useRouter();
+  const { signIn } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleRegister = () => {
-    if (!nombre || !telefono || !email || !password) {
+  const handleEmailChange = (text: string) => {
+    setEmail(text);
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    setIsEmailValid(emailRegex.test(text));
+  };
+
+  const [passwordRequirements, setPasswordRequirements] = useState({
+    length: false,
+    uppercase: false,
+    number: false,
+    special: false
+  });
+
+  const checkPasswordRequirements = (text: string) => {
+    setPasswordRequirements({
+      length: text.length >= 8,
+      uppercase: /[A-Z]/.test(text),
+      number: /[0-9]/.test(text),
+      special: /[!@#$%^&*(),.?":{}|<>]/.test(text)
+    });
+  };
+
+  const handlePasswordChange = (text: string) => {
+    setPassword(text);
+    setIsPasswordMatch(text === confirmPassword);
+    checkPasswordRequirements(text);
+  };
+
+  const handleConfirmPasswordChange = (text: string) => {
+    setConfirmPassword(text);
+    setIsPasswordMatch(password === text);
+  };
+
+  const handleRegister = async () => {
+    if (!nombre || !username || !email || !password || !confirmPassword) {
       Alert.alert('Error', 'Por favor, completa todos los campos.');
+      return;
+    }
+    if (!isEmailValid) {
+      Alert.alert('Error', 'Por favor, ingresa un correo válido.');
+      return;
+    }
+    
+    // Verificación adicional de requisitos de contraseña
+    if (!Object.values(passwordRequirements).every(Boolean)) {
+      Alert.alert('Error', 'La contraseña debe cumplir con todos los requisitos.');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Las contraseñas no coinciden.');
       return;
     }
     if (!acceptedTerms) {
       Alert.alert('Error', 'Debes aceptar los términos y condiciones para registrarte.');
       return;
     }
-    Alert.alert('Éxito', 'Registro exitoso.');
-    router.push('/(auth)/login'); // Redirige a la pantalla de login después de registrarse
+
+    try {
+      const hashedPassword = await Crypto.digestStringAsync(
+        Crypto.CryptoDigestAlgorithm.SHA256,
+        password
+      );
+
+      const userData = {
+        nombre,
+        username,
+        email,
+        password: hashedPassword
+      };
+
+      await AsyncStorage.setItem('userData', JSON.stringify(userData));
+      
+      try {
+        await signIn(); // Asegúrate de manejar cualquier error que pueda ocurrir aquí
+        Alert.alert('Éxito', 'Registro exitoso.');
+        router.push('/(main)');
+      } catch (signInError) {
+        console.error('Error durante el inicio de sesión:', signInError);
+        Alert.alert('Error', 'Registro exitoso pero hubo un problema al iniciar sesión automáticamente.');
+      }
+    } catch (error) {
+      console.error('Error al guardar los datos:', error);
+      Alert.alert('Error', 'No se pudieron guardar los datos del registro.');
+    }
   };
 
   return (
@@ -36,25 +119,70 @@ export default function RegisterScreen() {
       />
       <TextInput
         style={styles.input}
-        placeholder="Phone Number"
-        value={telefono}
-        onChangeText={setTelefono}
-        keyboardType="phone-pad"
+        placeholder="Username"
+        value={username}
+        onChangeText={setUsername}
       />
       <TextInput
-        style={styles.input}
+        style={[styles.input, !isEmailValid && styles.inputError]}
         placeholder="Email Address"
         value={email}
-        onChangeText={setEmail}
+        onChangeText={handleEmailChange}
         keyboardType="email-address"
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+      {!isEmailValid && <Text style={styles.errorText}>Invalid email format</Text>}
+      <View style={styles.passwordContainer}>
+        <TextInput
+          style={[styles.passwordInput, !isPasswordMatch && styles.inputError]}
+          placeholder="Password"
+          value={password}
+          onChangeText={handlePasswordChange}
+          secureTextEntry={!showPassword}
+        />
+        <TouchableOpacity 
+          style={styles.eyeButton}
+          onPress={() => setShowPassword(!showPassword)}
+        >
+          <Text style={styles.eyeIcon}>{showPassword ? '👁️' : '👁️‍🗨️'}</Text>
+        </TouchableOpacity>
+      </View>
+      
+      <View style={styles.requirementsContainer}>
+        <Text style={[
+          styles.requirementText,
+          passwordRequirements.length ? styles.requirementMet : styles.requirementNotMet
+        ]}>• Mínimo 8 caracteres</Text>
+        <Text style={[
+          styles.requirementText,
+          passwordRequirements.uppercase ? styles.requirementMet : styles.requirementNotMet
+        ]}>• Al menos una mayúscula</Text>
+        <Text style={[
+          styles.requirementText,
+          passwordRequirements.number ? styles.requirementMet : styles.requirementNotMet
+        ]}>• Al menos un número</Text>
+        <Text style={[
+          styles.requirementText,
+          passwordRequirements.special ? styles.requirementMet : styles.requirementNotMet
+        ]}>• Al menos un carácter especial</Text>
+      </View>
+      <View style={styles.passwordContainer}>
+        <TextInput
+          style={[styles.passwordInput, !isPasswordMatch && styles.inputError]}
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChangeText={handleConfirmPasswordChange}
+          secureTextEntry={!showConfirmPassword}
+        />
+        <TouchableOpacity 
+          style={styles.eyeButton}
+          onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+        >
+          <Text style={styles.eyeIcon}>{showConfirmPassword ? '👁️' : '👁️‍🗨️'}</Text>
+        </TouchableOpacity>
+      </View>
+      {!isPasswordMatch && confirmPassword !== '' && (
+        <Text style={styles.errorText}>Las contraseñas no coinciden</Text>
+      )}
       <View style={styles.checkboxContainer}>
         <TouchableOpacity
           style={[styles.checkbox, acceptedTerms && styles.checkboxChecked]}
@@ -98,6 +226,14 @@ const styles = StyleSheet.create({
     marginBottom: height * 0.02,
     fontSize: width * 0.045,
     color: '#000',
+  },
+  inputError: {
+    borderColor: 'red', // Cambia el borde a rojo si hay un error
+  },
+  errorText: {
+    color: 'red',
+    fontSize: width * 0.035,
+    marginBottom: height * 0.01,
   },
   checkboxContainer: {
     flexDirection: 'row',
@@ -144,5 +280,41 @@ const styles = StyleSheet.create({
   footerLink: {
     color: '#6A0DAD',
     fontWeight: 'bold',
+  },
+  requirementsContainer: {
+    marginBottom: height * 0.02,
+    paddingHorizontal: width * 0.02,
+  },
+  requirementText: {
+    fontSize: width * 0.035,
+    marginBottom: 5,
+  },
+  requirementMet: {
+    color: '#4CAF50', // Color verde para requisitos cumplidos
+  },
+  requirementNotMet: {
+    color: '#FF5252', // Color rojo para requisitos no cumplidos
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: height * 0.02,
+  },
+  passwordInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    padding: height * 0.015,
+    fontSize: width * 0.045,
+    color: '#000',
+  },
+  eyeButton: {
+    position: 'absolute',
+    right: width * 0.03,
+    padding: width * 0.02,
+  },
+  eyeIcon: {
+    fontSize: width * 0.05,
   },
 });
