@@ -13,10 +13,7 @@ export default function Main() {
       'Cerrar Sesión',
       '¿Estás seguro que deseas cerrar sesión?',
       [
-        {
-          text: 'Cancelar',
-          style: 'cancel'
-        },
+        { text: 'Cancelar', style: 'cancel' },
         {
           text: 'Sí, cerrar sesión',
           style: 'destructive',
@@ -37,12 +34,9 @@ export default function Main() {
   const handleClearData = async () => {
     Alert.alert(
       'Borrar Datos',
-      '¿Estás seguro que deseas borrar todos los datos? Esta acción no se puede deshacer.',
+      '¿Estás seguro que deseas borrar todos los datos?',
       [
-        {
-          text: 'Cancelar',
-          style: 'cancel'
-        },
+        { text: 'Cancelar', style: 'cancel' },
         {
           text: 'Sí, borrar todo',
           style: 'destructive',
@@ -61,16 +55,24 @@ export default function Main() {
     );
   };
 
+  const handleGoToUpload = () => {
+    router.push('/upload');
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Pantalla Principal</Text>
-      
+
+      <TouchableOpacity style={styles.uploadButton} onPress={handleGoToUpload}>
+        <Text style={styles.uploadText}>Subir Beat / Grabación</Text>
+      </TouchableOpacity>
+
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutText}>Cerrar Sesión</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity 
-        style={[styles.logoutButton, styles.clearDataButton]} 
+      <TouchableOpacity
+        style={[styles.logoutButton, styles.clearDataButton]}
         onPress={handleClearData}
       >
         <Text style={styles.logoutText}>Borrar Datos</Text>
@@ -82,30 +84,37 @@ export default function Main() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#121212',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    padding: 20,
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
+    color: 'white',
+    marginBottom: 40,
   },
-  logoutButton: {
-    backgroundColor: '#ff4444',
+  uploadButton: {
+    backgroundColor: '#1DB954',
     padding: 15,
     borderRadius: 10,
-    width: '80%',
-    alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 20,
   },
-  clearDataButton: {
-    backgroundColor: '#ff0000',
-    marginTop: 10,
+  uploadText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  logoutButton: {
+    backgroundColor: '#e53935',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 15,
   },
   logoutText: {
-    color: '#fff',
-    fontSize: 16,
+    color: 'white',
     fontWeight: 'bold',
+  },
+  clearDataButton: {
+    backgroundColor: '#b71c1c',
   },
 });
