@@ -37,6 +37,7 @@ const TermsScreen = () => {
 
         <ScrollView
           style={styles.scroll}
+          contentContainerStyle={{ paddingBottom: 140 }}
           onScroll={handleScroll}
           scrollEventThrottle={16}
           ref={scrollViewRef}
@@ -92,13 +93,17 @@ const TermsScreen = () => {
           </Text>
         </ScrollView>
 
-        <TouchableOpacity
-          style={[styles.button, !isAtBottom && styles.buttonDisabled]}
-          onPress={handleAccept}
-          disabled={!isAtBottom}
-        >
-          <Text style={styles.buttonText}>Agree and continue</Text>
-        </TouchableOpacity>
+        {/* Botón fijo en la parte inferior */}
+        <View style={styles.buttonWrapper}>
+          <TouchableOpacity
+            style={[styles.button, !isAtBottom && styles.buttonDisabled]}
+            onPress={handleAccept}
+            disabled={!isAtBottom}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.buttonText}>Agree and continue</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -110,12 +115,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 56, // Espacio para la flecha y el título
+    paddingTop: 56,
     backgroundColor: '#fff',
   },
   backButton: {
     position: 'absolute',
-    top: 12, // Más cerca del borde superior
+    top: 12,
     left: 8,
     zIndex: 10,
   },
@@ -141,11 +146,16 @@ const styles = StyleSheet.create({
   },
   scroll: {
     flex: 1,
-    marginBottom: 20,
   },
   text: {
     fontSize: 16,
     lineHeight: 24,
+  },
+  buttonWrapper: {
+    position: 'absolute',
+    bottom: 20,
+    left: 20,
+    right: 20,
   },
   button: {
     backgroundColor: '#00020D',
