@@ -15,6 +15,7 @@
     "preset": "jest-expo"
   },
   "dependencies": {
+    "@expo-google-fonts/poppins": "^0.3.1",
     "@expo-google-fonts/roboto": "^0.3.0",
     "@expo-google-fonts/ruslan-display": "^0.3.0",
     "@expo/vector-icons": "^14.0.2",
