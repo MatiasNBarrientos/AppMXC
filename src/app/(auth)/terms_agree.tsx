@@ -20,7 +20,7 @@ const TermsScreen = () => {
   };
 
   const handleAccept = () => {
-    router.replace('/(auth)/start');
+    router.replace('/(auth)/welcome');
   };
 
   return (
