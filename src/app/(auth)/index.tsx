@@ -16,7 +16,7 @@ const Auth = () => {
 const [isLoading, setIsLoading] = useState(false);
 
 let navigateTermsAgree = () => {
-    router.push('/(auth)/terms_agree');
+    router.push('/(auth)/welcome');
 };
 
 let loadingTimeout = () => {
