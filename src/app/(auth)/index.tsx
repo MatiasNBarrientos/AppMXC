@@ -1,101 +1,101 @@
-import { View, Text,SafeAreaView, StyleSheet, Image, ActivityIndicator } from 'react-native'
-import React from 'react'
-import imagePath from '@/src/constants/imagePath'
-import moderate, { moderateScale, verticalScale } from 'react-native-size-matters';
-import vertical, { moderateVerticalScale } from 'react-native-size-matters';
-import {useFonts, RuslanDisplay_400Regular } from '@expo-google-fonts/ruslan-display'
-import { useEffect } from 'react';
-import { useState } from 'react';
+import { View, Text, SafeAreaView, StyleSheet, Image, ActivityIndicator, useColorScheme } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import imagePath from '@/src/constants/imagePath';
+import { useDynamicStyles, colors } from '@/src/styles/globalStyles';
+import { useFonts, RuslanDisplay_400Regular } from '@expo-google-fonts/ruslan-display';
 import { router } from 'expo-router';
+import { moderateScale } from 'react-native-size-matters';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '@/src/utils/context/authcontext';
 
 const Auth = () => {
   const [fontsLoaded] = useFonts({
     RuslanDisplay_400Regular,
-  })
+  });
 
-const [isLoading, setIsLoading] = useState(false);
+  const systemColorScheme = useColorScheme();
+  const [isDarkMode] = useState(systemColorScheme === 'dark');
+  const [isLoading, setIsLoading] = useState(true);
+  const { signIn, isAuthenticated } = useAuth();
 
-let navigateTermsAgree = () => {
-    router.push('/(auth)/welcome');
-};
+  const dynamicStyles = useDynamicStyles();
+  const themeColors = isDarkMode ? colors.dark : colors.light;
 
-let loadingTimeout = () => {
-    setIsLoading(true);
-    setTimeout(navigateTermsAgree, 2000);
-};
- 
+  const checkAuthStatus = async () => {
+    try {
+      const [userData, isLoggedIn] = await Promise.all([
+        AsyncStorage.getItem('userData'),
+        AsyncStorage.getItem('isLoggedIn')
+      ]);
+
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      if (userData && isLoggedIn === 'true') {
+        const parsedUserData = JSON.parse(userData);
+        await signIn(parsedUserData); // Importante: pasar los datos del usuario
+        router.replace('/(main)');
+      } else {
+        await Promise.all([
+          AsyncStorage.removeItem('userData'),
+          AsyncStorage.removeItem('isLoggedIn')
+        ]);
+        router.replace('/(auth)/welcome');
+      }
+    } catch (error) {
+      console.error('Error al verificar autenticación:', error);
+      router.replace('/(auth)/welcome');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    setTimeout(loadingTimeout, 2000);
-  }, []);
+    if (fontsLoaded) {
+      checkAuthStatus();
+    }
+    // Añadir isAuthenticated como dependencia
+  }, [fontsLoaded, isAuthenticated]);
 
-
+  const styles = StyleSheet.create({
+    MelodyText: {
+      fontSize: moderateScale(30),
+      color: themeColors.primary,
+      textAlign: 'center',
+      fontFamily: 'RuslanDisplay_400Regular',
+    },
+    FromText: {
+      fontSize: moderateScale(12),
+      color: themeColors.secondary,
+    },
+    TeamText: {
+      fontSize: moderateScale(15),
+      fontWeight: 'bold',
+      color: themeColors.secondary,
+    },
+  });
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}></View>
-      <View style={styles.body}>
-        <Text style= {styles.MelodyText}>MelodyXChange</Text>
-        <Image source={imagePath.logo} style= {styles.logoStyle} resizeMode='contain'/>
+    <SafeAreaView style={[dynamicStyles.container, { backgroundColor: themeColors.background }]}>
+      <View style={dynamicStyles.header}></View>
+      <View style={dynamicStyles.body}>
+        <Text style={styles.MelodyText}>MelodyXChange</Text>
+        <Image source={imagePath.logo} style={dynamicStyles.logoStyle} resizeMode="contain" />
       </View>
-      <View style={styles.footer}>
-        { isLoading ?(
-            <>
-              <ActivityIndicator size={moderateScale(48)} color={'#6E0A94'}/>
-              <Text style={styles.TeamText}>Loading...</Text>
-            </>
-        ): (
-           <>
-            <Text style= {styles.FromText}>Made with ❤️ by</Text>
-            <Text style= {styles.TeamText}>MXC TEAM</Text>
+      <View style={dynamicStyles.footer}>
+        {isLoading ? (
+          <>
+            <ActivityIndicator size={moderateScale(48)} color={themeColors.primary} />
+            <Text style={styles.TeamText}>Loading...</Text>
           </>
-        )} 
-        
+        ) : (
+          <>
+            <Text style={styles.FromText}>Made with ❤️ by</Text>
+            <Text style={styles.TeamText}>MXC TEAM</Text>
+          </>
+        )}
       </View>
     </SafeAreaView>
-  )
-}
+  );
+};
 
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'column',
-    backgroundColor: 'white',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: moderateScale(70),
-  },
-  header: {},
-  body: {
-    alignItems: 'center',
-    gap: moderateVerticalScale(7),
-  },
-  footer: {
-    alignItems: 'center',
-    height: verticalScale(70),
-    justifyContent: 'flex-end',
-  },
-  logoStyle: {
-    width: moderateScale(70),
-    height: moderateScale(70),
-  },
-  MelodyText: {
-    fontSize: moderateScale(30),
-    color: '#9A0FD2',
-    textAlign: 'center',
-    fontFamily: 'RuslanDisplay_400Regular',
-  },
-  FromText: {
-    fontSize: moderateScale(12),
-    color: '#867373',
-
-  },
-  TeamText: {
-    fontSize: moderateScale(15),
-    fontWeight: 'bold',
-    color: '#867373',
-  },
-})
-
-export default Auth
+export default Auth;

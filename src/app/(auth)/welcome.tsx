@@ -10,6 +10,8 @@ import {
   Animated,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useDynamicStyles,getThemeColors} from '@/src/styles/globalStyles';
+import { useColorScheme } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -37,17 +39,20 @@ const slides = [
 export default function Welcome() {
   const router = useRouter();
   const scrollX = useRef(new Animated.Value(0)).current;
+  const dynamicStyles = useDynamicStyles(); // Obtiene estilos dinámicos
 
   const renderItem = ({ item }: any) => (
     <View style={styles.slide}>
       <Image source={item.image} style={styles.image} resizeMode="contain" />
-      <Text style={styles.title}>{item.title}</Text>
-      <Text style={styles.description}>{item.description}</Text>
+      <Text style={[styles.title, { color: dynamicStyles.themeColors.primary || '#000' }]}>{item.title}</Text>
+      <Text style={[styles.description, { color: dynamicStyles.themeColors.secondary || '#666' }]}>
+        {item.description}
+      </Text>
     </View>
   );
 
   const renderDots = () => (
-    <View style={styles.dotsContainer}>
+    <View style={dynamicStyles.dotsContainer}>
       {slides.map((_, index) => {
         const inputRange = [(index - 1) * width, index * width, (index + 1) * width];
 
@@ -57,13 +62,13 @@ export default function Welcome() {
           extrapolate: 'clamp',
         });
 
-        return <Animated.View key={index} style={[styles.dot, { opacity: dotOpacity }]} />;
+        return <Animated.View key={index} style={[dynamicStyles.dot, { opacity: dotOpacity }]} />;
       })}
     </View>
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[dynamicStyles.container, { backgroundColor: dynamicStyles.themeColors.background }]}>
       <FlatList
         horizontal
         pagingEnabled
@@ -81,20 +86,18 @@ export default function Welcome() {
       {renderDots()}
 
       <TouchableOpacity
-        style={styles.button}
+        style={[styles.button, { backgroundColor: dynamicStyles.themeColors.primary }]}
         onPress={() => router.replace('/(auth)/start')}
       >
-        <Text style={styles.buttonText}>Comenzar</Text>
+        <Text style={[styles.buttonText, { color: dynamicStyles.themeColors.background }]}>
+          Comenzar
+        </Text>
       </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000',
-  },
   slide: {
     width,
     alignItems: 'center',
@@ -108,39 +111,28 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    color: '#fff',
     fontWeight: 'bold',
     marginBottom: 10,
+    textAlign: 'center',
   },
   description: {
     fontSize: 16,
-    color: '#ccc',
     textAlign: 'center',
     paddingHorizontal: 20,
-  },
-  dotsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  dot: {
-    height: 10,
-    width: 10,
-    backgroundColor: '#a259ff',
-    borderRadius: 5,
-    marginHorizontal: 6,
+    lineHeight: 22,
   },
   button: {
-    backgroundColor: '#a259ff',
     margin: 50,
     borderRadius: 10,
     paddingVertical: 15,
     alignItems: 'center',
+    width: '80%',
   },
   buttonText: {
-    color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
+    textTransform: 'uppercase',
   },
 });
+
+

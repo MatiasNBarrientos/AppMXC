@@ -1,109 +1,57 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import {
-  View, Text, ScrollView, StyleSheet, TouchableOpacity, NativeSyntheticEvent, NativeScrollEvent, SafeAreaView,
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  SafeAreaView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { getThemeColors, useDynamicStyles } from '@/src/styles/globalStyles';
 
 const TermsScreen = () => {
   const router = useRouter();
   const scrollViewRef = useRef(null);
-  const [isAtBottom, setIsAtBottom] = useState(false);
-
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
-    const isBottom =
-      layoutMeasurement.height + contentOffset.y >= contentSize.height - 20;
-    if (isBottom && !isAtBottom) {
-      setIsAtBottom(true);
-    }
-  };
-
-  const handleAccept = () => {
-    router.replace('/(auth)/welcome');
-  };
+  const { themeColors, ...dynamicStyles } = useDynamicStyles();
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-      <View style={styles.container}>
-        {/* Botón volver */}
+    <SafeAreaView style={[dynamicStyles.container, { backgroundColor: themeColors.background }]}>
+      <View style={[dynamicStyles.body, styles.container]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <View style={styles.circle}>
-            <Ionicons name="arrow-back" size={24} color="gray" />
+          <View style={[styles.circle, { backgroundColor: themeColors.background, borderColor: themeColors.text }]}>
+            <Ionicons name="arrow-back" size={24} color={themeColors.text} />
           </View>
         </TouchableOpacity>
 
-        <Text style={styles.title}>Terms & Conditions</Text>
+        <Text style={[styles.title, dynamicStyles.textLarge, { color: themeColors.primary }]}>
+          Términos y Condiciones
+        </Text>
 
         <ScrollView
-          style={styles.scroll}
-          contentContainerStyle={{ paddingBottom: 140 }}
-          onScroll={handleScroll}
-          scrollEventThrottle={16}
+          style={[styles.scroll, { backgroundColor: themeColors.background }]}
+          contentContainerStyle={{ paddingBottom: 20 }}
           ref={scrollViewRef}
         >
-          <Text style={styles.text}>
+          <Text style={[styles.text, dynamicStyles.baseText, { color: themeColors.text }]}>
             {/* Texto largo de términos */}
-            L15.1 Thank you for visiting our Application 
-            Doctor 24×7 and enrolling as a member.{'\n\n'}
-            15.2 Your privacy is important to us. To better
-            protect your privacy, we are providing this notice 
-            explaining our policy with regards to the information 
-            you share with us. This privacy policy relates to the 
-            information we collect, online from Application, received 
-            through the email, by fax or telephone, or in person or
-            in any other way and retain and use for the purpose of
-            providing you services. If you do not agree to the terms
-            in this Policy, we kindly ask you not to use these 
-            portals and/or sign the contract document.{'\n\n'}
-            15.3 In order to use the services of this Application,
-            You are required to register yourself by verifying 
-            the authorised device. This Privacy Policy applies
-            to your information that we collect and receive on
-            and through Doctor 24×7; it does not apply to practices
-            of businesses that we do not own or control or people
-            we do not employ.{'\n\n'}
-            15.4 By using this Application, you agree to the terms of this Privacy Policy.
-            {'\n\n'}
-            15.5 We may update this Privacy Policy from time to time.
-            We will notify you about significant changes in the way we treat personal information
-            by sending a notice to the primary email address specified in your account or by placing
-            a prominent notice on our site, prior to the change becoming effective.
-            You are responsible for reviewing the changes to this Privacy Policy.
-            Your continued use of the Application after any such changes constitutes your acceptance
-            of the new Privacy Policy.
-            {'\n\n'}
-            15.6 We collect information from you when you register on our Application, place an order,
-            subscribe to our newsletter, respond to a survey or fill out a form.
-            When registering on our Application, as appropriate, you may be asked to enter your: name,
-            email address, mailing address, phone number or credit card information.
-            You may, however, visit our Application anonymously.
-            {'\n\n'}
-            15.7 We use the information we collect from you when you register, make a purchase,
-            sign up for our newsletter, respond to a survey or marketing communication,
-            surf the Application, or use certain other Application features in the following ways:
-            {'\n\n'}
-            - To personalize your experience and to allow us to deliver the type of content and product offerings
-            in which you are most interested.
-            {'\n\n'}
-            - To improve our Application in order to better serve you.
-            {'\n\n'}
-            - To allow us to better service you in responding to your customer service requests.
-            {'\n\n'}
+            L15.1 Gracias por visitar nuestra aplicación y registrarte como miembro.{"\n\n"}
+            15.2 Tu privacidad es importante para nosotros. Para protegerla mejor, estamos proporcionando
+            este aviso explicando nuestra política con respecto a la información que compartes con nosotros.
+            Esta política de privacidad se relaciona con la información que recopilamos en línea desde la
+            aplicación, recibida por correo electrónico, fax, teléfono, en persona o de cualquier otra manera,
+            y que retenemos y usamos para el propósito de brindarte servicios.{'\n\n'}
+            15.3 Al usar esta aplicación, aceptas los términos de esta política de privacidad.{'\n\n'}
+            15.4 Nos reservamos el derecho de actualizar esta política de privacidad de vez en cuando.
+            Notificaremos sobre cambios significativos enviando un aviso al correo electrónico principal
+            especificado en tu cuenta o colocando un aviso destacado en nuestra aplicación antes de que
+            los cambios entren en vigor.{'\n\n'}
+            15.5 Continuar usando la aplicación después de cualquier cambio constituye tu aceptación de la
+            nueva política de privacidad.{'\n\n'}
+            {/* Agrega más texto según sea necesario */}
           </Text>
         </ScrollView>
-
-        {/* Botón fijo en la parte inferior */}
-        <View style={styles.buttonWrapper}>
-          <TouchableOpacity
-            style={[styles.button, !isAtBottom && styles.buttonDisabled]}
-            onPress={handleAccept}
-            disabled={!isAtBottom}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.buttonText}>Agree and continue</Text>
-          </TouchableOpacity>
-        </View>
       </View>
     </SafeAreaView>
   );
@@ -116,7 +64,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
     paddingTop: 56,
-    backgroundColor: '#fff',
   },
   backButton: {
     position: 'absolute',
@@ -138,36 +85,14 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
   },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 18,
-    textAlign: 'center',
-  },
   scroll: {
     flex: 1,
   },
   text: {
-    fontSize: 16,
     lineHeight: 24,
   },
-  buttonWrapper: {
-    position: 'absolute',
-    bottom: 20,
-    left: 20,
-    right: 20,
-  },
-  button: {
-    backgroundColor: '#00020D',
-    padding: 15,
-    alignItems: 'center',
-    borderRadius: 8,
-  },
-  buttonDisabled: {
-    backgroundColor: '#00020D80',
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+  title: {
+    textAlign: 'center',
+    marginBottom: 20,
   },
 });
