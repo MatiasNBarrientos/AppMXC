@@ -1,12 +1,22 @@
 import React, { useState } from 'react';
-import {View,Text,TextInput,TouchableOpacity,StyleSheet,Dimensions,Alert,KeyboardAvoidingView,ScrollView,} from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+  Alert,
+  KeyboardAvoidingView,
+  ScrollView,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Crypto from 'expo-crypto';
 import { useAuth } from '../../utils/context/authcontext';
-import { useDynamicStyles} from '@/src/styles/globalStyles';
-
-
+import { useDynamicStyles } from '@/src/styles/globalStyles';
+import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
+ 
 const { width, height } = Dimensions.get('window');
 
 export default function RegisterScreen() {
@@ -18,18 +28,19 @@ export default function RegisterScreen() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [isEmailValid, setIsEmailValid] = useState(true);
   const [isPasswordMatch, setIsPasswordMatch] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [role, setRole] = useState<'buyer' | 'seller' | null>(null);
   const [passwordRequirements, setPasswordRequirements] = useState({
     length: false,
     uppercase: false,
     number: false,
     special: false,
   });
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const router = useRouter();
   const { signIn } = useAuth();
-  const { themeColors: themeColors, ...dynamicStyles } = useDynamicStyles();
+  const { themeColors, ...dynamicStyles } = useDynamicStyles();
 
   const checkPasswordRequirements = (text: string) => {
     setPasswordRequirements({
@@ -54,6 +65,10 @@ export default function RegisterScreen() {
   const handleRegister = async () => {
     if (!nombre || !username || !email || !password || !confirmPassword) {
       Alert.alert('Error', 'Por favor, completa todos los campos.');
+      return;
+    }
+    if (!role) {
+      Alert.alert('Error', 'Por favor, seleccioná un rol: comprador o vendedor.');
       return;
     }
     if (!isEmailValid) {
@@ -84,31 +99,19 @@ export default function RegisterScreen() {
         username,
         email,
         password: hashedPassword,
+        role,
       };
 
-      if (!signIn) {
-        throw new Error('La función signIn no está disponible');
-      }
+      await AsyncStorage.setItem('userData', JSON.stringify(userData));
+      await AsyncStorage.setItem('isLoggedIn', 'true');
+      await signIn(userData);
 
-      try {
-        // Primero guardar en AsyncStorage
-        await AsyncStorage.setItem('userData', JSON.stringify(userData));
-        await AsyncStorage.setItem('isLoggedIn', 'true');
-        
-        // Luego iniciar sesión
-        await signIn(userData);
-        
-        Alert.alert('Éxito', 'Registro exitoso.');
-        router.replace('/(main)'); // Usar replace en lugar de push
-      } catch (signInError) {
-        console.error('Error durante el inicio de sesión:', signInError);
-        // Limpiar storage en caso de error
-        await AsyncStorage.multiRemove(['userData', 'isLoggedIn']);
-        Alert.alert('Error', 'Hubo un problema al registrar tu cuenta. Por favor, intenta de nuevo.');
-      }
+      Alert.alert('Éxito', 'Registro exitoso.');
+      router.replace('/(main)');
     } catch (error) {
-      console.error('Error al guardar los datos:', error);
-      Alert.alert('Error', 'No se pudieron guardar los datos del registro.');
+      console.error('Error en el registro:', error);
+      await AsyncStorage.multiRemove(['userData', 'isLoggedIn']);
+      Alert.alert('Error', 'Hubo un problema al registrar tu cuenta.');
     }
   };
 
@@ -123,76 +126,78 @@ export default function RegisterScreen() {
       >
         <Text style={[styles.title, { color: themeColors.primary }]}>BIENVENIDO A MxC!</Text>
         <Text style={[styles.subtitle, { color: themeColors.secondary }]}>Crea tu cuenta para empezar</Text>
-        <TextInput
-          style={[styles.input, { borderColor: themeColors.secondary, color: themeColors.text }]}
-          placeholder="Nombre completo"
-          value={nombre}
-          onChangeText={setNombre}
-          autoCapitalize="words"
-          placeholderTextColor={themeColors.secondary}
-        />
-        <TextInput
-          style={[styles.input, { borderColor: themeColors.secondary, color: themeColors.text }]}
-          placeholder="Nombre de usuario"
-          value={username}
-          onChangeText={setUsername}
-          autoCapitalize="none"
-          placeholderTextColor={themeColors.secondary}
-        />
-        <TextInput
-          style={[styles.input, !isEmailValid && styles.inputError, { borderColor: themeColors.secondary, color: themeColors.text }]}
-          placeholder="Correo electrónico"
-          value={email}
-          onChangeText={(text) => {
-            setEmail(text);
-            setIsEmailValid(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text));
-          }}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          placeholderTextColor={themeColors.secondary}
-        />
+
+        <TextInput style={[styles.input, { borderColor: themeColors.secondary, color: themeColors.text }]} placeholder="Nombre completo" value={nombre} onChangeText={setNombre} autoCapitalize="words" placeholderTextColor={themeColors.secondary} />
+        <TextInput style={[styles.input, { borderColor: themeColors.secondary, color: themeColors.text }]} placeholder="Nombre de usuario" value={username} onChangeText={setUsername} autoCapitalize="none" placeholderTextColor={themeColors.secondary} />
+        <TextInput style={[styles.input, !isEmailValid && styles.inputError, { borderColor: themeColors.secondary, color: themeColors.text }]} placeholder="Correo electrónico" value={email} onChangeText={(text) => { setEmail(text); setIsEmailValid(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text)); }} keyboardType="email-address" autoCapitalize="none" placeholderTextColor={themeColors.secondary} />
         {!isEmailValid && <Text style={styles.errorText}>Formato de correo inválido</Text>}
 
+        {/* Rol */}
+        <Text style={[ styles.subtitle, { color: themeColors.secondary }]}>Seleccioná tu rol:</Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: verticalScale(20), width: '90%', alignSelf: 'center' }}>
+            {/* Botón Comprador */}
+            <TouchableOpacity
+              style={[
+                styles.roleButton,
+                {
+                  borderColor: role === 'buyer' ? themeColors.primary : themeColors.secondary,
+                  backgroundColor: role === 'buyer' ? themeColors.primary + '20' : 'transparent',
+                },
+              ]}
+              onPress={() => setRole('buyer')}
+            >
+              <Text
+                style={{
+                  color: role === 'buyer' ? themeColors.primary : themeColors.text,
+                  fontWeight: '600',
+                  fontSize: moderateScale(14),
+                }}
+              >
+                Comprador
+              </Text>
+            </TouchableOpacity>
+
+            {/* Botón Vendedor */}
+            <TouchableOpacity
+              style={[
+                styles.roleButton,
+                {
+                  borderColor: role === 'seller' ? themeColors.primary : themeColors.secondary,
+                  backgroundColor: role === 'seller' ? themeColors.primary + '20' : 'transparent',
+                },
+              ]}
+              onPress={() => setRole('seller')}
+            >
+              <Text
+                style={{
+                  color: role === 'seller' ? themeColors.primary : themeColors.text,
+                  fontWeight: '600',
+                  fontSize: moderateScale(14),
+                }}
+              >
+                Vendedor
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+
+        {/* Contraseña */}
         <View style={styles.passwordContainer}>
-          <TextInput
-            style={[styles.passwordInput, { borderColor: themeColors.secondary, color: themeColors.text }]}
-            placeholder="Contraseña"
-            value={password}
-            onChangeText={handlePasswordChange}
-            secureTextEntry={!showPassword}
-            autoCapitalize="none"
-            placeholderTextColor={themeColors.secondary}
-          />
+          <TextInput style={[styles.passwordInput, { borderColor: themeColors.secondary, color: themeColors.text }]} placeholder="Contraseña" value={password} onChangeText={handlePasswordChange} secureTextEntry={!showPassword} autoCapitalize="none" placeholderTextColor={themeColors.secondary} />
           <TouchableOpacity style={styles.eyeButton} onPress={() => setShowPassword(!showPassword)}>
             <Text style={styles.eyeIcon}>{showPassword ? '👁️' : '👁️‍🗨️'}</Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.passwordRequirements}>
-          <Text style={[styles.requirement, { color: themeColors.text }, passwordRequirements.length && styles.requirementMet]}>
-            • Al menos 8 caracteres
-          </Text>
-          <Text style={[styles.requirement, { color: themeColors.text }, passwordRequirements.uppercase && styles.requirementMet]}>
-            • Una letra mayúscula
-          </Text>
-          <Text style={[styles.requirement, { color: themeColors.text }, passwordRequirements.number && styles.requirementMet]}>
-            • Un número
-          </Text>
-          <Text style={[styles.requirement, { color: themeColors.text }, passwordRequirements.special && styles.requirementMet]}>
-            • Un carácter especial
-          </Text>
+          <Text style={[styles.requirement, { color: themeColors.text }, passwordRequirements.length && styles.requirementMet]}>• Al menos 8 caracteres</Text>
+          <Text style={[styles.requirement, { color: themeColors.text }, passwordRequirements.uppercase && styles.requirementMet]}>• Una letra mayúscula</Text>
+          <Text style={[styles.requirement, { color: themeColors.text }, passwordRequirements.number && styles.requirementMet]}>• Un número</Text>
+          <Text style={[styles.requirement, { color: themeColors.text }, passwordRequirements.special && styles.requirementMet]}>• Un carácter especial</Text>
         </View>
 
         <View style={styles.passwordContainer}>
-          <TextInput
-            style={[styles.passwordInput, { borderColor: themeColors.secondary, color: themeColors.text }]}
-            placeholder="Confirmar contraseña"
-            value={confirmPassword}
-            onChangeText={handleConfirmPasswordChange}
-            secureTextEntry={!showConfirmPassword}
-            autoCapitalize="none"
-            placeholderTextColor={themeColors.secondary}
-          />
+          <TextInput style={[styles.passwordInput, { borderColor: themeColors.secondary, color: themeColors.text }]} placeholder="Confirmar contraseña" value={confirmPassword} onChangeText={handleConfirmPasswordChange} secureTextEntry={!showConfirmPassword} autoCapitalize="none" placeholderTextColor={themeColors.secondary} />
           <TouchableOpacity style={styles.eyeButton} onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
             <Text style={styles.eyeIcon}>{showConfirmPassword ? '👁️' : '👁️‍🗨️'}</Text>
           </TouchableOpacity>
@@ -203,10 +208,7 @@ export default function RegisterScreen() {
         )}
 
         <View style={styles.checkboxContainer}>
-          <TouchableOpacity
-            style={[styles.checkbox, { borderColor: themeColors.text }, acceptedTerms && { backgroundColor: themeColors.primary }]}
-            onPress={() => setAcceptedTerms(!acceptedTerms)}
-          />
+          <TouchableOpacity style={[styles.checkbox, { borderColor: themeColors.text }, acceptedTerms && { backgroundColor: themeColors.primary }]} onPress={() => setAcceptedTerms(!acceptedTerms)} />
           <Text style={[styles.checkboxLabel, { color: themeColors.text }]}>
             Acepto los{' '}
             <Text style={[styles.link, { color: themeColors.primary }]} onPress={() => router.push('/terms_agree')}>
@@ -215,10 +217,7 @@ export default function RegisterScreen() {
           </Text>
         </View>
 
-        <TouchableOpacity
-          style={[styles.button, { backgroundColor: themeColors.primary }]}
-          onPress={handleRegister}
-        >
+        <TouchableOpacity style={[styles.button, { backgroundColor: themeColors.primary }]} onPress={handleRegister}>
           <Text style={[styles.buttonText, { color: themeColors.background }]}>Crear Cuenta</Text>
         </TouchableOpacity>
 
@@ -234,111 +233,142 @@ export default function RegisterScreen() {
 
 const styles = StyleSheet.create({
   title: {
-    fontSize: width * 0.07,
+    fontSize: moderateScale(24),
     fontWeight: 'bold',
-    marginBottom: height * 0.03,
+    marginBottom: verticalScale(16),
     textAlign: 'center',
   },
+
   subtitle: {
-    fontSize: width * 0.04,
-    marginBottom: height * 0.04,
+    fontSize: moderateScale(16),
+    marginBottom: verticalScale(20),
     textAlign: 'center',
   },
+
   input: {
-    width: '98%',
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: height * 0.015,
-    marginBottom: height * 0.02,
-    fontSize: width * 0.045,
+  width: '90%',
+  borderWidth: 1,
+  borderRadius: moderateScale(12),
+  paddingVertical: verticalScale(12),
+  paddingHorizontal: scale(14),
+  marginBottom: verticalScale(15),
+  fontSize: moderateScale(14),
+  alignSelf: 'center',
   },
+
   inputError: {
     borderColor: 'red',
   },
+
   errorText: {
     color: 'red',
-    fontSize: width * 0.035,
-    marginBottom: height * 0.01,
+    fontSize: moderateScale(13),
+    marginBottom: verticalScale(10),
+    textAlign: 'center',
   },
+
   checkboxContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: height * 0.02,
+    marginBottom: verticalScale(20),
+    paddingHorizontal: scale(20),
   },
+
   checkbox: {
-    width: width * 0.05,
-    height: width * 0.05,
+    width: scale(20),
+    height: scale(20),
     borderWidth: 1,
-    borderRadius: 5,
-    marginRight: width * 0.02,
+    borderRadius: scale(5),
+    marginRight: scale(10),
   },
-  checkboxChecked: {
-    backgroundColor: 'transparent', // Se aplicará el color dinámicamente
-  },
+
   checkboxLabel: {
-    fontSize: width * 0.04,
+    fontSize: moderateScale(14),
+    flexShrink: 1,
   },
+
   link: {
     fontWeight: 'bold',
   },
+
   button: {
-    paddingVertical: height * 0.02,
-    borderRadius: 25,
+    paddingVertical: verticalScale(15),
+    borderRadius: moderateScale(25),
     alignItems: 'center',
-    marginTop: height * 0.02,
+    marginTop: verticalScale(7),
     elevation: 3,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
+    width: '90%',
+    alignSelf: 'center',
   },
+
   buttonText: {
-    fontSize: width * 0.045,
+    fontSize: moderateScale(16),
     fontWeight: 'bold',
   },
+
   footerText: {
-    marginTop: height * 0.02,
-    fontSize: width * 0.04,
+    marginTop: verticalScale(7),
+    fontSize: moderateScale(14),
     textAlign: 'center',
   },
+
   footerLink: {
     fontWeight: 'bold',
   },
+
   passwordContainer: {
-    width: '98%',
+    width: '90%',
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: height * 0.02,
+    marginBottom: verticalScale(15),
+    alignSelf: 'center',
   },
+
   passwordInput: {
     flex: 1,
-    width: '98%',
     borderWidth: 1,
-    borderRadius: 10,
-    padding: height * 0.015,
-    paddingHorizontal: width * 0.04,
-    fontSize: width * 0.045,
+    borderRadius: moderateScale(10),
+    paddingVertical: verticalScale(12),
+    paddingHorizontal: scale(14),
+    fontSize: moderateScale(14),
   },
+
   eyeButton: {
     position: 'absolute',
-    right: width * 0.03,
-    padding: width * 0.02,
+    right: scale(10),
+    padding: scale(8),
   },
+
   eyeIcon: {
-    fontSize: width * 0.05,
+    fontSize: moderateScale(16),
   },
+
   passwordRequirements: {
-    marginBottom: height * 0.02,
-    width: '98%',
+    marginBottom: verticalScale(15),
+    width: '90%',
+    alignSelf: 'center',
   },
+
   requirement: {
-    fontSize: width * 0.035,
+    fontSize: moderateScale(13),
     textAlign: 'left',
   },
+
   requirementMet: {
     color: 'green',
   },
+
+  roleButton: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: moderateScale(10),
+    paddingVertical: verticalScale(12),
+    marginHorizontal: scale(10),
+    alignItems: 'center',
+  },
+
 });

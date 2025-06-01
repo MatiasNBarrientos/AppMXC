@@ -1,17 +1,9 @@
 import React, { useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Dimensions,
-  FlatList,
-  Image,
-  TouchableOpacity,
-  Animated,
-} from 'react-native';
+import { View,Text,StyleSheet,Dimensions,FlatList,Image,TouchableOpacity,Animated,} from 'react-native';
 import { useRouter } from 'expo-router';
-import { useDynamicStyles,getThemeColors} from '@/src/styles/globalStyles';
-import { useColorScheme } from 'react-native';
+import { useDynamicStyles } from '@/src/styles/globalStyles';
+import { useFonts, Poppins_400Regular } from '@expo-google-fonts/poppins';
+import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 
 const { width } = Dimensions.get('window');
 
@@ -39,13 +31,37 @@ const slides = [
 export default function Welcome() {
   const router = useRouter();
   const scrollX = useRef(new Animated.Value(0)).current;
-  const dynamicStyles = useDynamicStyles(); // Obtiene estilos dinámicos
+  const dynamicStyles = useDynamicStyles();
+
+  const [fontsLoaded] = useFonts({
+    Poppins_400Regular,
+  });
+
+  if (!fontsLoaded) return <Text style={{ textAlign: 'center' }}>Cargando fuente...</Text>;
 
   const renderItem = ({ item }: any) => (
     <View style={styles.slide}>
-      <Image source={item.image} style={styles.image} resizeMode="contain" />
-      <Text style={[styles.title, { color: dynamicStyles.themeColors.primary || '#000' }]}>{item.title}</Text>
-      <Text style={[styles.description, { color: dynamicStyles.themeColors.secondary || '#666' }]}>
+      <Image source={item.image} style={styles.image} resizeMode="cover" />
+      <Text
+        style={[
+          styles.title,
+          {
+            color: dynamicStyles.themeColors.primary,
+            fontFamily: 'Poppins_400Regular',
+          },
+        ]}
+      >
+        {item.title}
+      </Text>
+      <Text
+        style={[
+          styles.description,
+          {
+            color: dynamicStyles.themeColors.secondary,
+            fontFamily: 'Poppins_400Regular',
+          },
+        ]}
+      >
         {item.description}
       </Text>
     </View>
@@ -76,10 +92,9 @@ export default function Welcome() {
         data={slides}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-          { useNativeDriver: false }
-        )}
+        onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], {
+          useNativeDriver: false,
+        })}
         scrollEventThrottle={16}
       />
 
@@ -88,8 +103,17 @@ export default function Welcome() {
       <TouchableOpacity
         style={[styles.button, { backgroundColor: dynamicStyles.themeColors.primary }]}
         onPress={() => router.replace('/(auth)/start')}
+        activeOpacity={0.9}
       >
-        <Text style={[styles.buttonText, { color: dynamicStyles.themeColors.background }]}>
+        <Text
+          style={[
+            styles.buttonText,
+            {
+              color: dynamicStyles.themeColors.background,
+              fontFamily: 'Poppins_400Regular',
+            },
+          ]}
+        >
           Comenzar
         </Text>
       </TouchableOpacity>
@@ -102,37 +126,42 @@ const styles = StyleSheet.create({
     width,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
+    padding: scale(20),
   },
   image: {
-    width: 250,
-    height: 250,
-    marginBottom: 30,
+    width: '100%',
+    height: verticalScale(350),
+    borderRadius: scale(12),
+    marginBottom: verticalScale(30),
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 10,
+    fontSize: moderateScale(24),
+    fontWeight: '600',
+    marginBottom: verticalScale(10),
     textAlign: 'center',
   },
   description: {
-    fontSize: 16,
+    fontSize: moderateScale(15),
     textAlign: 'center',
-    paddingHorizontal: 20,
-    lineHeight: 22,
+    paddingHorizontal: scale(25),
+    lineHeight: moderateScale(22),
+    maxWidth: '90%',
   },
   button: {
-    margin: 50,
-    borderRadius: 10,
-    paddingVertical: 15,
+    marginVertical: verticalScale(30),
+    borderRadius: moderateScale(12),
+    paddingVertical: verticalScale(14),
     alignItems: 'center',
     width: '80%',
+    elevation: 3, // sombra Android
+    shadowColor: '#000', // sombra iOS
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
   },
   buttonText: {
-    fontSize: 18,
+    fontSize: moderateScale(16),
     fontWeight: 'bold',
     textTransform: 'uppercase',
   },
 });
-
-
