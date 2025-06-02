@@ -1,7 +1,7 @@
 import React from 'react';
-import {View,Text,TouchableOpacity,Image,StyleSheet} from 'react-native';
+import {View,Text,TouchableOpacity,Image,StyleSheet,} from 'react-native';
 import { useRouter } from 'expo-router';
-import { useFonts, Poppins_400Regular } from '@expo-google-fonts/poppins';
+import { useFonts, Poppins_400Regular, Poppins_900Black } from '@expo-google-fonts/poppins';
 import { useDynamicStyles } from '@/src/styles/globalStyles';
 import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 
@@ -11,13 +11,14 @@ export default function StartScreen() {
 
   const [fontsLoaded] = useFonts({
     Poppins_400Regular,
+    Poppins_900Black
   });
 
   if (!fontsLoaded) return <Text style={{ textAlign: 'center' }}>Cargando fuente...</Text>;
 
   return (
     <View style={[styles.container, { backgroundColor: dynamicStyles.themeColors.background }]}>
-      <Text style={[styles.title, { fontFamily: 'Poppins_400Regular', color: dynamicStyles.themeColors.primary }]}>
+      <Text style={[styles.title, { fontFamily: 'Poppins_900Black', color: dynamicStyles.themeColors.primary }]}>
         COMPRA Y VENDE BEATS
       </Text>
 
@@ -108,4 +109,4 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textTransform: 'uppercase',
   },
-});
+});    

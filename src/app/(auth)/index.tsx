@@ -23,21 +23,30 @@ const Auth = () => {
 
   const checkAuthStatus = async () => {
     try {
-      const [userData, isLoggedIn] = await Promise.all([
+      const [userData, isLoggedIn, userRole] = await Promise.all([
         AsyncStorage.getItem('userData'),
-        AsyncStorage.getItem('isLoggedIn')
+        AsyncStorage.getItem('isLoggedIn'),
+        AsyncStorage.getItem('userRole'),
       ]);
 
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       if (userData && isLoggedIn === 'true') {
         const parsedUserData = JSON.parse(userData);
-        await signIn(parsedUserData); // Importante: pasar los datos del usuario
-        router.replace('/(main)');
+        await signIn(parsedUserData);
+
+        if (userRole === 'buyer') {
+          router.replace('/(buyer)/index');
+        } else if (userRole === 'seller') {
+          router.replace('/(seller)');
+        } else {
+          router.replace('/(auth)/welcome');
+        }
       } else {
         await Promise.all([
           AsyncStorage.removeItem('userData'),
-          AsyncStorage.removeItem('isLoggedIn')
+          AsyncStorage.removeItem('isLoggedIn'),
+          AsyncStorage.removeItem('userRole'),
         ]);
         router.replace('/(auth)/welcome');
       }
@@ -48,6 +57,7 @@ const Auth = () => {
       setIsLoading(false);
     }
   };
+
 
   useEffect(() => {
     if (fontsLoaded) {

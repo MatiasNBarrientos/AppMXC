@@ -103,11 +103,17 @@ export default function RegisterScreen() {
       };
 
       await AsyncStorage.setItem('userData', JSON.stringify(userData));
+      await AsyncStorage.setItem('userRole', userData.role); //Se guarda el rol
       await AsyncStorage.setItem('isLoggedIn', 'true');
       await signIn(userData);
 
       Alert.alert('Éxito', 'Registro exitoso.');
-      router.replace('/(main)');
+
+      if (userData.role === 'buyer') {
+        router.replace('/(buyer)/index');
+      } else if (userData.role === 'seller') {
+        router.replace('/(seller)');
+      }
     } catch (error) {
       console.error('Error en el registro:', error);
       await AsyncStorage.multiRemove(['userData', 'isLoggedIn']);

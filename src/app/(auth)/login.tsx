@@ -73,10 +73,18 @@ export default function LoginScreen() {
         Alert.alert('Error', 'Credenciales incorrectas');
         return;
       }
+      await AsyncStorage.setItem('userData', JSON.stringify(userData));
+      await AsyncStorage.setItem('userRole', userData.role); //Se guarda el rol
+      await AsyncStorage.setItem('isLoggedIn', 'true');
+      await signIn(userData);
 
-      await signIn(userData); // Utilizamos la función signIn del contexto
-      Alert.alert('Éxito', 'Inicio de sesión exitoso.');
-      router.push('/(main)');
+      Alert.alert('Éxito', 'Registro exitoso.');
+
+      if (userData.role === 'buyer') {
+        router.replace('/(buyer)');
+      } else if (userData.role === 'seller') {
+        router.replace('/(seller)');
+      }
     } catch (error) {
       console.error('Error durante el inicio de sesión:', error);
       Alert.alert('Error', 'Ocurrió un error durante el inicio de sesión.');
