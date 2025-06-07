@@ -110,7 +110,7 @@ export default function RegisterScreen() {
       Alert.alert('Éxito', 'Registro exitoso.');
 
       if (userData.role === 'buyer') {
-        router.replace('/(buyer)/index');
+        router.replace('/(buyer)');
       } else if (userData.role === 'seller') {
         router.replace('/(seller)');
       }

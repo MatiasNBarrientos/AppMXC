@@ -33,7 +33,6 @@ const ChatScreen = () => {
   const renderChatItem = ({ item }: { item: ChatItem }) => (
     <TouchableOpacity 
       style={[styles.chatItem, { borderBottomColor: themeColors.primary }]}
-      
     >
       <View style={styles.chatInfo}>
         <Text style={[styles.name, { color: themeColors.text }]}>{item.name}</Text>

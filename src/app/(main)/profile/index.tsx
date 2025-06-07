@@ -2,7 +2,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Alert, Image } from 'react-na
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/src/utils/context/authcontext';
-import { getThemeColors, useDynamicStyles } from '@/src/styles/globalStyles';
+import { useDynamicStyles } from '@/src/styles/globalStyles';
 import { Ionicons } from '@expo/vector-icons';
 import { moderateScale, verticalScale } from 'react-native-size-matters';
 import * as ImagePicker from 'expo-image-picker';

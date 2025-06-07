@@ -196,6 +196,17 @@ export function useDynamicStyles() {
       fontWeight: 'bold',
       color: themeColors.text,
     },
+    requirementText: {
+      fontSize: 14,
+      marginBottom: 5,
+      color: themeColors.text,
+    },
+    requirementMet: {
+      color: '#34c759',
+    },
+    requirementNotMet: {
+    color: '#ff3b30',
+  },
   });
 
   return {

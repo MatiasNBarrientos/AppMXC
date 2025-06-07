@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, useColorScheme } from 'react-native';
 import { useRouter } from 'expo-router';
-import { UserStorage } from '@/src/utils/storage/storage'; // Actualizada la ruta de importación
 import * as Crypto from 'expo-crypto';
-
-const { width, height } = Dimensions.get('window');
+import { getThemeColors } from '@/src/styles/globalStyles';
+import { UserStorage } from '@/src/utils/storage/storage';
 
 export default function ChangePasswordScreen() {
+  const colorScheme = useColorScheme(); // Obtener el esquema de color del sistema
+  const themeColors = getThemeColors(); // Pasar el esquema a getThemeColors
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
@@ -85,14 +86,20 @@ export default function ChangePasswordScreen() {
     }
   };
 
+  useEffect(() => {
+    // Este efecto se ejecutará cuando cambie el esquema de color
+    console.log('Color scheme changed:', colorScheme);
+  }, [colorScheme]);
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Cambiar Contraseña</Text>
+    <View style={[styles.container, { backgroundColor: themeColors.background}]}>
+      <Text style={[styles.title, { color: themeColors.text }]}>Cambiar Contraseña</Text>
       
-      <View style={styles.passwordContainer}>
+      <View style={[styles.passwordContainer, { borderColor: themeColors.primary }]}>
         <TextInput
-          style={styles.passwordInput}
+          style={[styles.passwordInput, { color: themeColors.text }]}
           placeholder="Contraseña actual"
+          placeholderTextColor={themeColors.text + '80'}
           value={currentPassword}
           onChangeText={setCurrentPassword}
           secureTextEntry={!showCurrentPassword}
@@ -102,14 +109,21 @@ export default function ChangePasswordScreen() {
           style={styles.eyeButton}
           onPress={() => setShowCurrentPassword(!showCurrentPassword)}
         >
-          <Text style={styles.eyeIcon}>{showCurrentPassword ? '👁️' : '👁️‍🗨️'}</Text>
+          <Text style={[styles.eyeIcon, { color: themeColors.text }]}>
+            {showCurrentPassword ? '👁️' : '👁️‍🗨️'}
+          </Text>
         </TouchableOpacity>
       </View>
 
-      <View style={styles.passwordContainer}>
+      <View style={[styles.passwordContainer, { borderColor: themeColors.primary }]}>
         <TextInput
-          style={[styles.passwordInput, !isPasswordMatch && styles.inputError]}
+          style={[
+            styles.passwordInput, 
+            { color: themeColors.text },
+            !isPasswordMatch && { borderColor: themeColors.secondary }
+          ]}
           placeholder="Nueva contraseña"
+          placeholderTextColor={themeColors.text + '80'}
           value={newPassword}
           onChangeText={handleNewPasswordChange}
           secureTextEntry={!showNewPassword}
@@ -119,33 +133,35 @@ export default function ChangePasswordScreen() {
           style={styles.eyeButton}
           onPress={() => setShowNewPassword(!showNewPassword)}
         >
-          <Text style={styles.eyeIcon}>{showNewPassword ? '👁️' : '👁️‍🗨️'}</Text>
+          <Text style={[styles.eyeIcon, { color: themeColors.text }]}>
+            {showNewPassword ? '👁️' : '👁️‍🗨️'}
+          </Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.requirementsContainer}>
-        <Text style={[
-          styles.requirementText,
-          passwordRequirements.length ? styles.requirementMet : styles.requirementNotMet
-        ]}>• Mínimo 8 caracteres</Text>
-        <Text style={[
-          styles.requirementText,
-          passwordRequirements.uppercase ? styles.requirementMet : styles.requirementNotMet
-        ]}>• Al menos una mayúscula</Text>
-        <Text style={[
-          styles.requirementText,
-          passwordRequirements.number ? styles.requirementMet : styles.requirementNotMet
-        ]}>• Al menos un número</Text>
-        <Text style={[
-          styles.requirementText,
-          passwordRequirements.special ? styles.requirementMet : styles.requirementNotMet
-        ]}>• Al menos un carácter especial</Text>
+        {Object.entries(passwordRequirements).map(([key, met]) => (
+          <Text 
+            key={key}
+            style={[
+              styles.requirementText,
+              { color: met ? themeColors.accent : themeColors.secondary }
+            ]}
+          >
+            • {getRequirementText(key)}
+          </Text>
+        ))}
       </View>
 
-      <View style={styles.passwordContainer}>
+      <View style={[styles.passwordContainer, { borderColor: themeColors.primary }]}>
         <TextInput
-          style={[styles.passwordInput, !isPasswordMatch && styles.inputError]}
+          style={[
+            styles.passwordInput,
+            { color: themeColors.text },
+            !isPasswordMatch && { borderColor: themeColors.secondary }
+          ]}
           placeholder="Confirmar nueva contraseña"
+          placeholderTextColor={themeColors.text + '80'}
           value={confirmNewPassword}
           onChangeText={handleConfirmPasswordChange}
           secureTextEntry={!showConfirmPassword}
@@ -155,16 +171,28 @@ export default function ChangePasswordScreen() {
           style={styles.eyeButton}
           onPress={() => setShowConfirmPassword(!showConfirmPassword)}
         >
-          <Text style={styles.eyeIcon}>{showConfirmPassword ? '👁️' : '👁️‍🗨️'}</Text>
+          <Text style={[styles.eyeIcon, { color: themeColors.text }]}>
+            {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
+          </Text>
         </TouchableOpacity>
       </View>
 
       {!isPasswordMatch && confirmNewPassword !== '' && (
-        <Text style={styles.errorText}>Las contraseñas no coinciden</Text>
+        <Text style={[styles.errorText, { color: themeColors.secondary }]}>
+          Las contraseñas no coinciden
+        </Text>
       )}
 
-      <TouchableOpacity style={styles.button} onPress={handleChangePassword}>
-        <Text style={styles.buttonText}>Actualizar Contraseña</Text>
+      <TouchableOpacity 
+        style={[
+          styles.button,
+          { backgroundColor: themeColors.primary }
+        ]} 
+        onPress={handleChangePassword}
+      >
+        <Text style={[styles.buttonText, { color: themeColors.background }]}>
+          Actualizar Contraseña
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -173,76 +201,62 @@ export default function ChangePasswordScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: width * 0.05,
-    backgroundColor: '#fff',
+    padding: 20,
   },
   title: {
-    fontSize: width * 0.07,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: '#000',
-    marginBottom: height * 0.03,
-    textAlign: 'left',
+    marginBottom: 30,
   },
   passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: height * 0.02,
+    marginBottom: 15,
     borderWidth: 1,
-    borderColor: '#ccc',
     borderRadius: 10,
+    overflow: 'hidden',
   },
   passwordInput: {
     flex: 1,
-    padding: height * 0.015,
-    fontSize: width * 0.045,
-    color: '#000',
+    padding: 15,
+    fontSize: 16,
   },
   eyeButton: {
-    padding: 10,
+    padding: 15,
   },
   eyeIcon: {
-    fontSize: width * 0.06,
-  },
-  inputError: {
-    borderColor: 'red',
-  },
-  errorText: {
-    color: 'red',
-    fontSize: width * 0.035,
-    marginBottom: height * 0.01,
+    fontSize: 20,
   },
   requirementsContainer: {
-    marginBottom: height * 0.02,
+    marginVertical: 15,
   },
   requirementText: {
-    fontSize: width * 0.035,
-    marginBottom: height * 0.01,
+    fontSize: 14,
+    marginBottom: 8,
   },
-  requirementMet: {
-    color: 'green',
-  },
-  requirementNotMet: {
-    color: 'red',
+  errorText: {
+    fontSize: 14,
+    marginBottom: 10,
   },
   button: {
-    backgroundColor: '#6A0DAD',
-    paddingVertical: height * 0.02,
-    borderRadius: 25,
+    padding: 15,
+    borderRadius: 10,
     alignItems: 'center',
-    marginTop: height * 0.02,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    marginTop: 20,
   },
   buttonText: {
-    color: '#fff',
-    fontSize: width * 0.045,
+    fontSize: 16,
     fontWeight: 'bold',
   },
 });
+
+// Función auxiliar para obtener el texto del requisito
+const getRequirementText = (key: string) => {
+  const texts = {
+    length: 'Mínimo 8 caracteres',
+    uppercase: 'Al menos una mayúscula',
+    number: 'Al menos un número',
+    special: 'Al menos un carácter especial'
+  };
+  return texts[key as keyof typeof texts];
+};

@@ -1,8 +1,8 @@
 import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet } from 'react-native';
-import React from 'react';
 import { useDynamicStyles } from '@/src/styles/globalStyles';
 import { moderateScale, verticalScale } from 'react-native-size-matters';
 import { Ionicons } from '@expo/vector-icons';
+
 
 interface Beat {
   id: string;
@@ -13,6 +13,8 @@ interface Beat {
   price: number;
 }
 
+
+
 const featuredBeats: Beat[] = [
   {
     id: '1',
@@ -22,7 +24,31 @@ const featuredBeats: Beat[] = [
     image: require('@/src/assets/images/placeholder.png'),
     price: 29.99
   },
-  // Añade más beats aquí
+  {
+    id: '2',
+    title: 'winter Chill',
+    producer: 'DJ Fresh',
+    genre: 'Pop',
+    image: require('@/src/assets/images/placeholder.png'),
+    price: 19.99
+  },
+  {
+    id: '3',
+    title: 'Urban Beats',
+    producer: 'DJ Fresh',
+    genre: 'Hip-Hop',
+    image: require('@/src/assets/images/placeholder.png'),
+    price: 24.99
+  },
+  {
+    id: '4',
+    title: 'Electronic Dreams',
+    producer: 'DJ Fresh',
+    genre: 'EDM',
+    image: require('@/src/assets/images/placeholder.png'),
+    price: 34.99
+  },
+  // aqui logica para agregar más beats
 ];
 
 export default function HomeScreen() {
@@ -62,13 +88,12 @@ export default function HomeScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <Text style={[styles.title, { color: dynamicStyles.themeColors.text }]}>
-            Descubre
+            Descubre Beats
           </Text>
           <Text style={[styles.subtitle, { color: dynamicStyles.themeColors.secondary }]}>
             Los mejores beats para tu próximo hit
           </Text>
         </View>
-
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: dynamicStyles.themeColors.text }]}>
             Destacados
@@ -81,11 +106,11 @@ export default function HomeScreen() {
             {featuredBeats.map(renderBeatCard)}
           </ScrollView>
         </View>
-
         {/* Más secciones aquí */}
       </ScrollView>
     </View>
   );
+  
 }
 
 const styles = StyleSheet.create({
@@ -117,14 +142,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: moderateScale(20),
   },
   beatCard: {
-    width: moderateScale(200),
+    width: moderateScale(150),
     marginRight: moderateScale(15),
     borderRadius: moderateScale(10),
     overflow: 'hidden',
   },
   beatImage: {
     width: '100%',
-    height: moderateScale(200),
+    height: moderateScale(150),
     resizeMode: 'cover',
   },
   beatInfo: {
