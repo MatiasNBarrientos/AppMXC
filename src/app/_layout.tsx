@@ -49,9 +49,9 @@ function RootLayoutNav() {
     <>
       <Stack screenOptions={{ headerShown: false }} />
       {!loading && (
-        <Redirect 
-          href={isAuthenticated ? '/(main)' : '/(auth)/welcome'} 
-        />
+        // <Redirect 
+        //   href={isAuthenticated ? '/(main)' : '/(auth)/welcome'} 
+        <Redirect href={isAuthenticated ? '/(buyer)' : '/(auth)/welcome'} />
       )}
     </>
   );

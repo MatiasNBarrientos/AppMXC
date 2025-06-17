@@ -36,7 +36,7 @@ const Auth = () => {
         await signIn(parsedUserData);
 
         if (userRole === 'buyer') {
-          router.replace('/(buyer)/index');
+          router.replace('/(buyer)');
         } else if (userRole === 'seller') {
           router.replace('/(seller)');
         } else {

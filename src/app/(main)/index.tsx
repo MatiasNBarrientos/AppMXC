@@ -48,7 +48,6 @@ const featuredBeats: Beat[] = [
     image: require('@/src/assets/images/placeholder.png'),
     price: 34.99
   },
-  // aqui logica para agregar más beats
 ];
 
 export default function HomeScreen() {
