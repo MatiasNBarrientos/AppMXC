@@ -3,35 +3,18 @@ import React from 'react';
 import { useDynamicStyles } from '@/src/styles/globalStyles';
 import { moderateScale, verticalScale } from 'react-native-size-matters';
 import { Ionicons } from '@expo/vector-icons';
-
-interface Beat {
-  id: string;
-  title: string;
-  producer: string;
-  genre: string;
-  image: any;
-  price: number;
-}
-
-const featuredBeats: Beat[] = [
-  {
-    id: '1',
-    title: 'Summer Vibes',
-    producer: 'DJ Fresh',
-    genre: 'Pop',
-    image: require('@/src/assets/images/placeholder.png'),
-    price: 29.99
-  },
-  // Añade más beats aquí
-];
+import { useRouter } from 'expo-router';
+import { featuredBeats, Beat } from '@/src/constants/beats';
 
 export default function HomeScreen() {
   const dynamicStyles = useDynamicStyles();
+  const router = useRouter();
 
   const renderBeatCard = (beat: Beat) => (
-    <TouchableOpacity 
+    <TouchableOpacity
       key={beat.id}
       style={[styles.beatCard, { backgroundColor: dynamicStyles.themeColors.background }]}
+      onPress={() => router.push({ pathname: '/(seller)/player', params: { id: beat.id } })}
     >
       <Image source={beat.image} style={styles.beatImage} />
       <View style={styles.beatInfo}>
@@ -45,13 +28,6 @@ export default function HomeScreen() {
           <Text style={[styles.beatPrice, { color: dynamicStyles.themeColors.primary }]}>
             ${beat.price}
           </Text>
-          <TouchableOpacity style={styles.playButton}>
-            <Ionicons 
-              name="play" 
-              size={24} 
-              color={dynamicStyles.themeColors.primary} 
-            />
-          </TouchableOpacity>
         </View>
       </View>
     </TouchableOpacity>
@@ -81,8 +57,6 @@ export default function HomeScreen() {
             {featuredBeats.map(renderBeatCard)}
           </ScrollView>
         </View>
-
-        {/* Más secciones aquí */}
       </ScrollView>
     </View>
   );
@@ -117,7 +91,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: moderateScale(20),
   },
   beatCard: {
-    width: moderateScale(200),
+    width: moderateScale(160),
     marginRight: moderateScale(15),
     borderRadius: moderateScale(10),
     overflow: 'hidden',
@@ -147,8 +121,5 @@ const styles = StyleSheet.create({
   beatPrice: {
     fontSize: moderateScale(18),
     fontWeight: 'bold',
-  },
-  playButton: {
-    padding: moderateScale(5),
   },
 });

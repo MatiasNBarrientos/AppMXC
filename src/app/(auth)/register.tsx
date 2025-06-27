@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -41,6 +41,50 @@ export default function RegisterScreen() {
   const router = useRouter();
   const { signIn } = useAuth();
   const { themeColors, ...dynamicStyles } = useDynamicStyles();
+
+  useEffect(() => {
+    const createDefaultUsers = async () => {
+      // Comprador
+      const buyerKey = 'comprador@admin.com';
+      const sellerKey = 'vendedor@admin.com';
+      const defaultPassword = 'Admin135#';
+      const hashedPassword = await Crypto.digestStringAsync(
+        Crypto.CryptoDigestAlgorithm.SHA256,
+        defaultPassword
+      );
+
+      // Verifica si ya existen
+      const buyerExists = await AsyncStorage.getItem(buyerKey);
+      if (!buyerExists) {
+        await AsyncStorage.setItem(
+          buyerKey,
+          JSON.stringify({
+            nombre: 'Comprador Admin',
+            username: 'comprador',
+            email: buyerKey,
+            password: hashedPassword,
+            role: 'buyer',
+          })
+        );
+      }
+
+      const sellerExists = await AsyncStorage.getItem(sellerKey);
+      if (!sellerExists) {
+        await AsyncStorage.setItem(
+          sellerKey,
+          JSON.stringify({
+            nombre: 'Vendedor Admin',
+            username: 'vendedor',
+            email: sellerKey,
+            password: hashedPassword,
+            role: 'seller',
+          })
+        );
+      }
+    };
+
+    createDefaultUsers();
+  }, []);
 
   const checkPasswordRequirements = (text: string) => {
     setPasswordRequirements({
@@ -105,6 +149,7 @@ export default function RegisterScreen() {
       await AsyncStorage.setItem('userData', JSON.stringify(userData));
       await AsyncStorage.setItem('userRole', userData.role); //Se guarda el rol
       await AsyncStorage.setItem('isLoggedIn', 'true');
+      await AsyncStorage.setItem('logueadoAnteriormente', 'true'); // <-- Guarda la variable aquí
       await signIn(userData);
 
       Alert.alert('Éxito', 'Registro exitoso.');

@@ -85,6 +85,12 @@ const RootNavigation = () => {
         }}
       />
       <Tabs.Screen
+          name="player"
+          options={{
+            href: null,
+          }}
+        />
+      <Tabs.Screen
         name="profile"
         options={{
           tabBarIcon: ({ focused, color }) => (
@@ -97,6 +103,7 @@ const RootNavigation = () => {
         }}
       />
     </Tabs>
+    
   );
 }
 

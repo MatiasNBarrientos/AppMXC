@@ -51,43 +51,32 @@ export default function LoginScreen() {
     }
 
     try {
-      const userDataString = await AsyncStorage.getItem('userData');
+      const userDataString = await AsyncStorage.getItem(email); // <-- Buscar por email
       if (!userDataString) {
         Alert.alert('Error', 'Usuario no encontrado');
         return;
       }
-
       const userData = JSON.parse(userDataString);
-
-      if (userData.email !== email) {
-        Alert.alert('Error', 'Credenciales incorrectas');
-        return;
-      }
-
-      const hashedInputPassword = await Crypto.digestStringAsync(
+      const hashedPassword = await Crypto.digestStringAsync(
         Crypto.CryptoDigestAlgorithm.SHA256,
         password
       );
-
-      if (userData.password !== hashedInputPassword) {
-        Alert.alert('Error', 'Credenciales incorrectas');
+      if (userData.password !== hashedPassword) {
+        Alert.alert('Error', 'Contraseña incorrecta');
         return;
       }
+      // Aquí puedes guardar el usuario logueado y redirigir según el rol
       await AsyncStorage.setItem('userData', JSON.stringify(userData));
-      await AsyncStorage.setItem('userRole', userData.role); //Se guarda el rol
+      await AsyncStorage.setItem('userRole', userData.role);
       await AsyncStorage.setItem('isLoggedIn', 'true');
-      await signIn(userData);
-
-      Alert.alert('Éxito', 'Registro exitoso.');
-
+      // Redirigir según rol
       if (userData.role === 'buyer') {
         router.replace('/(buyer)');
       } else if (userData.role === 'seller') {
         router.replace('/(seller)');
       }
     } catch (error) {
-      console.error('Error durante el inicio de sesión:', error);
-      Alert.alert('Error', 'Ocurrió un error durante el inicio de sesión.');
+      Alert.alert('Error', 'No se pudo iniciar sesión');
     }
   };
 
