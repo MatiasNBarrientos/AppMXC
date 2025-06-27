@@ -1,18 +1,12 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-import { Platform } from 'react-native';
+import { View, Text } from 'react-native'
+import React from 'react'
+import { Stack } from 'expo-router'
 
-const RootNavigation = () => {
+const AuthLayout = () => {
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarStyle: { display: 'none' }, // Oculta la barra de navegación
-      }}>
-      <Tabs.Screen name="index" />
-      <Tabs.Screen name="explore" />
-    </Tabs>
-  );
+    <Stack screenOptions={{ headerShown: false }}>
+    </Stack>
+  )
 }
 
-export default RootNavigation;
+export default AuthLayout

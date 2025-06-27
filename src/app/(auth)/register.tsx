@@ -1,10 +1,22 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+  Alert,
+  KeyboardAvoidingView,
+  ScrollView,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Crypto from 'expo-crypto';
 import { useAuth } from '../../utils/context/authcontext';
-
+import { useDynamicStyles } from '@/src/styles/globalStyles';
+import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
+ 
 const { width, height } = Dimensions.get('window');
 
 export default function RegisterScreen() {
@@ -16,30 +28,70 @@ export default function RegisterScreen() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [isEmailValid, setIsEmailValid] = useState(true);
   const [isPasswordMatch, setIsPasswordMatch] = useState(true);
-  const router = useRouter();
-  const { signIn } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  const handleEmailChange = (text: string) => {
-    setEmail(text);
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    setIsEmailValid(emailRegex.test(text));
-  };
-
+  const [role, setRole] = useState<'buyer' | 'seller' | null>(null);
   const [passwordRequirements, setPasswordRequirements] = useState({
     length: false,
     uppercase: false,
     number: false,
-    special: false
+    special: false,
   });
+
+  const router = useRouter();
+  const { signIn } = useAuth();
+  const { themeColors, ...dynamicStyles } = useDynamicStyles();
+
+  useEffect(() => {
+    const createDefaultUsers = async () => {
+      // Comprador
+      const buyerKey = 'comprador@admin.com';
+      const sellerKey = 'vendedor@admin.com';
+      const defaultPassword = 'Admin135#';
+      const hashedPassword = await Crypto.digestStringAsync(
+        Crypto.CryptoDigestAlgorithm.SHA256,
+        defaultPassword
+      );
+
+      // Verifica si ya existen
+      const buyerExists = await AsyncStorage.getItem(buyerKey);
+      if (!buyerExists) {
+        await AsyncStorage.setItem(
+          buyerKey,
+          JSON.stringify({
+            nombre: 'Comprador Admin',
+            username: 'comprador',
+            email: buyerKey,
+            password: hashedPassword,
+            role: 'buyer',
+          })
+        );
+      }
+
+      const sellerExists = await AsyncStorage.getItem(sellerKey);
+      if (!sellerExists) {
+        await AsyncStorage.setItem(
+          sellerKey,
+          JSON.stringify({
+            nombre: 'Vendedor Admin',
+            username: 'vendedor',
+            email: sellerKey,
+            password: hashedPassword,
+            role: 'seller',
+          })
+        );
+      }
+    };
+
+    createDefaultUsers();
+  }, []);
 
   const checkPasswordRequirements = (text: string) => {
     setPasswordRequirements({
       length: text.length >= 8,
       uppercase: /[A-Z]/.test(text),
       number: /[0-9]/.test(text),
-      special: /[!@#$%^&*(),.?":{}|<>]/.test(text)
+      special: /[!@#$%^&*(),.?":{}|<>]/.test(text),
     });
   };
 
@@ -59,17 +111,18 @@ export default function RegisterScreen() {
       Alert.alert('Error', 'Por favor, completa todos los campos.');
       return;
     }
+    if (!role) {
+      Alert.alert('Error', 'Por favor, seleccioná un rol: comprador o vendedor.');
+      return;
+    }
     if (!isEmailValid) {
       Alert.alert('Error', 'Por favor, ingresa un correo válido.');
       return;
     }
-    
-    // Verificación adicional de requisitos de contraseña
     if (!Object.values(passwordRequirements).every(Boolean)) {
       Alert.alert('Error', 'La contraseña debe cumplir con todos los requisitos.');
       return;
     }
-
     if (password !== confirmPassword) {
       Alert.alert('Error', 'Las contraseñas no coinciden.');
       return;
@@ -89,232 +142,284 @@ export default function RegisterScreen() {
         nombre,
         username,
         email,
-        password: hashedPassword
+        password: hashedPassword,
+        role,
       };
 
       await AsyncStorage.setItem('userData', JSON.stringify(userData));
-      
-      try {
-        await signIn(); // Asegúrate de manejar cualquier error que pueda ocurrir aquí
-        Alert.alert('Éxito', 'Registro exitoso.');
-        router.push('/(main)');
-      } catch (signInError) {
-        console.error('Error durante el inicio de sesión:', signInError);
-        Alert.alert('Error', 'Registro exitoso pero hubo un problema al iniciar sesión automáticamente.');
+      await AsyncStorage.setItem('userRole', userData.role); //Se guarda el rol
+      await AsyncStorage.setItem('isLoggedIn', 'true');
+      await AsyncStorage.setItem('logueadoAnteriormente', 'true'); // <-- Guarda la variable aquí
+      await signIn(userData);
+
+      Alert.alert('Éxito', 'Registro exitoso.');
+
+      if (userData.role === 'buyer') {
+        router.replace('/(buyer)');
+      } else if (userData.role === 'seller') {
+        router.replace('/(seller)');
       }
     } catch (error) {
-      console.error('Error al guardar los datos:', error);
-      Alert.alert('Error', 'No se pudieron guardar los datos del registro.');
+      console.error('Error en el registro:', error);
+      await AsyncStorage.multiRemove(['userData', 'isLoggedIn']);
+      Alert.alert('Error', 'Hubo un problema al registrar tu cuenta.');
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Sign Up</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Full Name"
-        value={nombre}
-        onChangeText={setNombre}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Username"
-        value={username}
-        onChangeText={setUsername}
-      />
-      <TextInput
-        style={[styles.input, !isEmailValid && styles.inputError]}
-        placeholder="Email Address"
-        value={email}
-        onChangeText={handleEmailChange}
-        keyboardType="email-address"
-      />
-      {!isEmailValid && <Text style={styles.errorText}>Invalid email format</Text>}
-      <View style={styles.passwordContainer}>
-        <TextInput
-          style={[styles.passwordInput, !isPasswordMatch && styles.inputError]}
-          placeholder="Password"
-          value={password}
-          onChangeText={handlePasswordChange}
-          secureTextEntry={!showPassword}
-        />
-        <TouchableOpacity 
-          style={styles.eyeButton}
-          onPress={() => setShowPassword(!showPassword)}
-        >
-          <Text style={styles.eyeIcon}>{showPassword ? '👁️' : '👁️‍🗨️'}</Text>
+    <KeyboardAvoidingView style={{ flex: 1 }}>
+      <ScrollView
+        contentContainerStyle={[
+          dynamicStyles.container,
+          { justifyContent: 'center', backgroundColor: themeColors.background },
+        ]}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Text style={[styles.title, { color: themeColors.primary }]}>BIENVENIDO A MxC!</Text>
+        <Text style={[styles.subtitle, { color: themeColors.secondary }]}>Crea tu cuenta para empezar</Text>
+
+        <TextInput style={[styles.input, { borderColor: themeColors.secondary, color: themeColors.text }]} placeholder="Nombre completo" value={nombre} onChangeText={setNombre} autoCapitalize="words" placeholderTextColor={themeColors.secondary} />
+        <TextInput style={[styles.input, { borderColor: themeColors.secondary, color: themeColors.text }]} placeholder="Nombre de usuario" value={username} onChangeText={setUsername} autoCapitalize="none" placeholderTextColor={themeColors.secondary} />
+        <TextInput style={[styles.input, !isEmailValid && styles.inputError, { borderColor: themeColors.secondary, color: themeColors.text }]} placeholder="Correo electrónico" value={email} onChangeText={(text) => { setEmail(text); setIsEmailValid(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text)); }} keyboardType="email-address" autoCapitalize="none" placeholderTextColor={themeColors.secondary} />
+        {!isEmailValid && <Text style={styles.errorText}>Formato de correo inválido</Text>}
+
+        {/* Rol */}
+        <Text style={[ styles.subtitle, { color: themeColors.secondary }]}>Seleccioná tu rol:</Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: verticalScale(20), width: '90%', alignSelf: 'center' }}>
+            {/* Botón Comprador */}
+            <TouchableOpacity
+              style={[
+                styles.roleButton,
+                {
+                  borderColor: role === 'buyer' ? themeColors.primary : themeColors.secondary,
+                  backgroundColor: role === 'buyer' ? themeColors.primary + '20' : 'transparent',
+                },
+              ]}
+              onPress={() => setRole('buyer')}
+            >
+              <Text
+                style={{
+                  color: role === 'buyer' ? themeColors.primary : themeColors.text,
+                  fontWeight: '600',
+                  fontSize: moderateScale(14),
+                }}
+              >
+                Comprador
+              </Text>
+            </TouchableOpacity>
+
+            {/* Botón Vendedor */}
+            <TouchableOpacity
+              style={[
+                styles.roleButton,
+                {
+                  borderColor: role === 'seller' ? themeColors.primary : themeColors.secondary,
+                  backgroundColor: role === 'seller' ? themeColors.primary + '20' : 'transparent',
+                },
+              ]}
+              onPress={() => setRole('seller')}
+            >
+              <Text
+                style={{
+                  color: role === 'seller' ? themeColors.primary : themeColors.text,
+                  fontWeight: '600',
+                  fontSize: moderateScale(14),
+                }}
+              >
+                Vendedor
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+
+        {/* Contraseña */}
+        <View style={styles.passwordContainer}>
+          <TextInput style={[styles.passwordInput, { borderColor: themeColors.secondary, color: themeColors.text }]} placeholder="Contraseña" value={password} onChangeText={handlePasswordChange} secureTextEntry={!showPassword} autoCapitalize="none" placeholderTextColor={themeColors.secondary} />
+          <TouchableOpacity style={styles.eyeButton} onPress={() => setShowPassword(!showPassword)}>
+            <Text style={styles.eyeIcon}>{showPassword ? '👁️' : '👁️‍🗨️'}</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.passwordRequirements}>
+          <Text style={[styles.requirement, { color: themeColors.text }, passwordRequirements.length && styles.requirementMet]}>• Al menos 8 caracteres</Text>
+          <Text style={[styles.requirement, { color: themeColors.text }, passwordRequirements.uppercase && styles.requirementMet]}>• Una letra mayúscula</Text>
+          <Text style={[styles.requirement, { color: themeColors.text }, passwordRequirements.number && styles.requirementMet]}>• Un número</Text>
+          <Text style={[styles.requirement, { color: themeColors.text }, passwordRequirements.special && styles.requirementMet]}>• Un carácter especial</Text>
+        </View>
+
+        <View style={styles.passwordContainer}>
+          <TextInput style={[styles.passwordInput, { borderColor: themeColors.secondary, color: themeColors.text }]} placeholder="Confirmar contraseña" value={confirmPassword} onChangeText={handleConfirmPasswordChange} secureTextEntry={!showConfirmPassword} autoCapitalize="none" placeholderTextColor={themeColors.secondary} />
+          <TouchableOpacity style={styles.eyeButton} onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+            <Text style={styles.eyeIcon}>{showConfirmPassword ? '👁️' : '👁️‍🗨️'}</Text>
+          </TouchableOpacity>
+        </View>
+
+        {!isPasswordMatch && confirmPassword !== '' && (
+          <Text style={styles.errorText}>Las contraseñas no coinciden</Text>
+        )}
+
+        <View style={styles.checkboxContainer}>
+          <TouchableOpacity style={[styles.checkbox, { borderColor: themeColors.text }, acceptedTerms && { backgroundColor: themeColors.primary }]} onPress={() => setAcceptedTerms(!acceptedTerms)} />
+          <Text style={[styles.checkboxLabel, { color: themeColors.text }]}>
+            Acepto los{' '}
+            <Text style={[styles.link, { color: themeColors.primary }]} onPress={() => router.push('/terms_agree')}>
+              Términos y Condiciones
+            </Text>
+          </Text>
+        </View>
+
+        <TouchableOpacity style={[styles.button, { backgroundColor: themeColors.primary }]} onPress={handleRegister}>
+          <Text style={[styles.buttonText, { color: themeColors.background }]}>Crear Cuenta</Text>
         </TouchableOpacity>
-      </View>
-      
-      <View style={styles.requirementsContainer}>
-        <Text style={[
-          styles.requirementText,
-          passwordRequirements.length ? styles.requirementMet : styles.requirementNotMet
-        ]}>• Mínimo 8 caracteres</Text>
-        <Text style={[
-          styles.requirementText,
-          passwordRequirements.uppercase ? styles.requirementMet : styles.requirementNotMet
-        ]}>• Al menos una mayúscula</Text>
-        <Text style={[
-          styles.requirementText,
-          passwordRequirements.number ? styles.requirementMet : styles.requirementNotMet
-        ]}>• Al menos un número</Text>
-        <Text style={[
-          styles.requirementText,
-          passwordRequirements.special ? styles.requirementMet : styles.requirementNotMet
-        ]}>• Al menos un carácter especial</Text>
-      </View>
-      <View style={styles.passwordContainer}>
-        <TextInput
-          style={[styles.passwordInput, !isPasswordMatch && styles.inputError]}
-          placeholder="Confirm Password"
-          value={confirmPassword}
-          onChangeText={handleConfirmPasswordChange}
-          secureTextEntry={!showConfirmPassword}
-        />
-        <TouchableOpacity 
-          style={styles.eyeButton}
-          onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-        >
-          <Text style={styles.eyeIcon}>{showConfirmPassword ? '👁️' : '👁️‍🗨️'}</Text>
+
+        <TouchableOpacity onPress={() => router.push('/(auth)/login')}>
+          <Text style={[styles.footerText, { color: themeColors.secondary }]}>
+            ¿Ya tienes una cuenta? <Text style={styles.footerLink}>Inicia sesión</Text>
+          </Text>
         </TouchableOpacity>
-      </View>
-      {!isPasswordMatch && confirmPassword !== '' && (
-        <Text style={styles.errorText}>Las contraseñas no coinciden</Text>
-      )}
-      <View style={styles.checkboxContainer}>
-        <TouchableOpacity
-          style={[styles.checkbox, acceptedTerms && styles.checkboxChecked]}
-          onPress={() => setAcceptedTerms(!acceptedTerms)}
-        />
-        <Text style={styles.checkboxLabel}>
-          I accept the <Text style={styles.link}>Terms and Conditions</Text>
-        </Text>
-      </View>
-      <TouchableOpacity style={styles.button} onPress={handleRegister}>
-        <Text style={styles.buttonText}>Sign Up</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => router.push('/(auth)/login')}>
-        <Text style={styles.footerText}>
-          Already have an account? <Text style={styles.footerLink}>Sign In</Text>
-        </Text>
-      </TouchableOpacity>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: width * 0.05,
-    backgroundColor: '#fff',
-  },
   title: {
-    fontSize: width * 0.07,
+    fontSize: moderateScale(24),
     fontWeight: 'bold',
-    color: '#000',
-    marginBottom: height * 0.03,
-    textAlign: 'left',
+    marginBottom: verticalScale(16),
+    textAlign: 'center',
   },
+
+  subtitle: {
+    fontSize: moderateScale(16),
+    marginBottom: verticalScale(20),
+    textAlign: 'center',
+  },
+
   input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 10,
-    padding: height * 0.015,
-    marginBottom: height * 0.02,
-    fontSize: width * 0.045,
-    color: '#000',
+  width: '90%',
+  borderWidth: 1,
+  borderRadius: moderateScale(12),
+  paddingVertical: verticalScale(12),
+  paddingHorizontal: scale(14),
+  marginBottom: verticalScale(15),
+  fontSize: moderateScale(14),
+  alignSelf: 'center',
   },
+
   inputError: {
-    borderColor: 'red', // Cambia el borde a rojo si hay un error
+    borderColor: 'red',
   },
+
   errorText: {
     color: 'red',
-    fontSize: width * 0.035,
-    marginBottom: height * 0.01,
+    fontSize: moderateScale(13),
+    marginBottom: verticalScale(10),
+    textAlign: 'center',
   },
+
   checkboxContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: height * 0.02,
+    marginBottom: verticalScale(20),
+    paddingHorizontal: scale(20),
   },
+
   checkbox: {
-    width: width * 0.05,
-    height: width * 0.05,
+    width: scale(20),
+    height: scale(20),
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    marginRight: width * 0.02,
+    borderRadius: scale(5),
+    marginRight: scale(10),
   },
-  checkboxChecked: {
-    backgroundColor: '#6A0DAD',
-  },
+
   checkboxLabel: {
-    fontSize: width * 0.04,
-    color: '#000',
+    fontSize: moderateScale(14),
+    flexShrink: 1,
   },
+
   link: {
-    color: '#6A0DAD',
     fontWeight: 'bold',
   },
+
   button: {
-    backgroundColor: '#6A0DAD',
-    paddingVertical: height * 0.02,
-    borderRadius: 10,
+    paddingVertical: verticalScale(15),
+    borderRadius: moderateScale(25),
     alignItems: 'center',
-    marginTop: height * 0.02,
+    marginTop: verticalScale(7),
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    width: '90%',
+    alignSelf: 'center',
   },
+
   buttonText: {
-    color: '#fff',
-    fontSize: width * 0.045,
+    fontSize: moderateScale(16),
     fontWeight: 'bold',
   },
+
   footerText: {
-    marginTop: height * 0.02,
-    fontSize: width * 0.04,
-    color: '#000',
+    marginTop: verticalScale(7),
+    fontSize: moderateScale(14),
     textAlign: 'center',
   },
+
   footerLink: {
-    color: '#6A0DAD',
     fontWeight: 'bold',
   },
-  requirementsContainer: {
-    marginBottom: height * 0.02,
-    paddingHorizontal: width * 0.02,
-  },
-  requirementText: {
-    fontSize: width * 0.035,
-    marginBottom: 5,
-  },
-  requirementMet: {
-    color: '#4CAF50', // Color verde para requisitos cumplidos
-  },
-  requirementNotMet: {
-    color: '#FF5252', // Color rojo para requisitos no cumplidos
-  },
+
   passwordContainer: {
+    width: '90%',
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: height * 0.02,
+    marginBottom: verticalScale(15),
+    alignSelf: 'center',
   },
+
   passwordInput: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 10,
-    padding: height * 0.015,
-    fontSize: width * 0.045,
-    color: '#000',
+    borderRadius: moderateScale(10),
+    paddingVertical: verticalScale(12),
+    paddingHorizontal: scale(14),
+    fontSize: moderateScale(14),
   },
+
   eyeButton: {
     position: 'absolute',
-    right: width * 0.03,
-    padding: width * 0.02,
+    right: scale(10),
+    padding: scale(8),
   },
+
   eyeIcon: {
-    fontSize: width * 0.05,
+    fontSize: moderateScale(16),
   },
+
+  passwordRequirements: {
+    marginBottom: verticalScale(15),
+    width: '90%',
+    alignSelf: 'center',
+  },
+
+  requirement: {
+    fontSize: moderateScale(13),
+    textAlign: 'left',
+  },
+
+  requirementMet: {
+    color: 'green',
+  },
+
+  roleButton: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: moderateScale(10),
+    paddingVertical: verticalScale(12),
+    marginHorizontal: scale(10),
+    alignItems: 'center',
+  },
+
 });

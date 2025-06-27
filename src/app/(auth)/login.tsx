@@ -2,8 +2,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Crypto from 'expo-crypto';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Alert, Dimensions, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Dimensions, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useAuth } from '../../utils/context/authcontext';
+import { useDynamicStyles,getThemeColors } from '@/src/styles/globalStyles';
+import { moderateScale, verticalScale } from 'react-native-size-matters';
 
 const { width, height } = Dimensions.get('window');
 
@@ -14,6 +16,7 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const { signIn } = useAuth();
+  const dynamicStyles = useDynamicStyles();
 
   useEffect(() => {
     checkStoredCredentials();
@@ -48,149 +51,101 @@ export default function LoginScreen() {
     }
 
     try {
-      const userDataString = await AsyncStorage.getItem('userData');
+      const userDataString = await AsyncStorage.getItem(email); // <-- Buscar por email
       if (!userDataString) {
         Alert.alert('Error', 'Usuario no encontrado');
         return;
       }
-
       const userData = JSON.parse(userDataString);
-
-      if (userData.email !== email) {
-        Alert.alert('Error', 'Credenciales incorrectas');
-        return;
-      }
-
-      const hashedInputPassword = await Crypto.digestStringAsync(
+      const hashedPassword = await Crypto.digestStringAsync(
         Crypto.CryptoDigestAlgorithm.SHA256,
         password
       );
-
-      if (userData.password !== hashedInputPassword) {
-        Alert.alert('Error', 'Credenciales incorrectas');
+      if (userData.password !== hashedPassword) {
+        Alert.alert('Error', 'Contraseña incorrecta');
         return;
       }
-
-      await signIn(); // Utilizamos la función signIn del contexto
-      Alert.alert('Éxito', 'Inicio de sesión exitoso.');
-      router.push('/(main)');
+      // Aquí puedes guardar el usuario logueado y redirigir según el rol
+      await AsyncStorage.setItem('userData', JSON.stringify(userData));
+      await AsyncStorage.setItem('userRole', userData.role);
+      await AsyncStorage.setItem('isLoggedIn', 'true');
+      // Redirigir según rol
+      if (userData.role === 'buyer') {
+        router.replace('/(buyer)');
+      } else if (userData.role === 'seller') {
+        router.replace('/(seller)');
+      }
     } catch (error) {
-      console.error('Error durante el inicio de sesión:', error);
-      Alert.alert('Error', 'Ocurrió un error durante el inicio de sesión.');
+      Alert.alert('Error', 'No se pudo iniciar sesión');
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Sign In</Text>
+    <View style={[dynamicStyles.container, dynamicStyles.loginContainer]}>
+      <Text style={[dynamicStyles.title, dynamicStyles.loginTitle]}>
+        BIENVENIDO DE VUELTA!
+      </Text>
+      <Text style={[dynamicStyles.description, dynamicStyles.loginSubtitle]}>
+        Inicia sesión para continuar
+      </Text>
+      
       <TextInput
-        style={[styles.input, !isEmailValid && styles.inputError]}
-        placeholder="Email Address"
+        style={[
+          dynamicStyles.input,
+          !isEmailValid && dynamicStyles.inputError,
+          { color: dynamicStyles.themeColors.text }
+        ]}
+        placeholder="Correo electrónico"
+        placeholderTextColor={dynamicStyles.themeColors.secondary}
         value={email}
         onChangeText={handleEmailChange}
         keyboardType="email-address"
+        autoCapitalize="none"
       />
-      {!isEmailValid && <Text style={styles.errorText}>Invalid email format</Text>}
-      <View style={styles.passwordContainer}>
+      
+      {!isEmailValid && (
+        <Text style={[dynamicStyles.errorText, { color: 'red' }]}>
+          Formato de correo inválido
+        </Text>
+      )}
+      
+      <View style={dynamicStyles.passwordContainer}>
         <TextInput
-          style={styles.passwordInput}
-          placeholder="Password"
+          style={[
+            dynamicStyles.input,
+            { color: dynamicStyles.themeColors.text }
+          ]}
+          placeholder="Contraseña"
+          placeholderTextColor={dynamicStyles.themeColors.secondary}
           value={password}
           onChangeText={setPassword}
           secureTextEntry={!showPassword}
+          autoCapitalize="none"
         />
-        <TouchableOpacity 
-          style={styles.eyeButton}
+        
+        <TouchableOpacity
+          style={dynamicStyles.showPasswordButton}
           onPress={() => setShowPassword(!showPassword)}
         >
-          <Text style={styles.eyeIcon}>{showPassword ? '👁️' : '👁️‍🗨️'}</Text>
+          <Text style={[dynamicStyles.showPasswordIcon, { color: dynamicStyles.themeColors.text }]}>
+            {showPassword ? '👁️' : '👁️‍🗨️'}
+          </Text>
         </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Sign In</Text>
+
+      <TouchableOpacity 
+        style={[dynamicStyles.button, { marginTop: verticalScale(20) }]}
+        onPress={handleLogin}
+      >
+        <Text style={dynamicStyles.buttonText}>Iniciar Sesión</Text>
       </TouchableOpacity>
+
       <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
-        <Text style={styles.footerText}>
-          I'm a new user. <Text style={styles.footerLink}>Sign up</Text>
+        <Text style={[dynamicStyles.textCenter, { marginTop: verticalScale(15) }]}>
+          ¿No tienes una cuenta?{' '}
+          <Text style={dynamicStyles.link}>Regístrate</Text>
         </Text>
       </TouchableOpacity>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: width * 0.05,
-    backgroundColor: '#fff',
-  },
-  title: {
-    fontSize: width * 0.07,
-    fontWeight: 'bold',
-    color: '#000',
-    marginBottom: height * 0.03,
-    textAlign: 'left',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 10,
-    padding: height * 0.015,
-    marginBottom: height * 0.02,
-    fontSize: width * 0.045,
-    color: '#000',
-  },
-  inputError: {
-    borderColor: 'red', // Cambia el borde a rojo si hay un error
-  },
-  errorText: {
-    color: 'red',
-    fontSize: width * 0.035,
-    marginBottom: height * 0.01,
-  },
-  button: {
-    backgroundColor: '#6A0DAD',
-    paddingVertical: height * 0.02,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginTop: height * 0.02,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: width * 0.045,
-    fontWeight: 'bold',
-  },
-  footerText: {
-    marginTop: height * 0.02,
-    fontSize: width * 0.04,
-    color: '#000',
-    textAlign: 'center',
-  },
-  footerLink: {
-    color: '#6A0DAD',
-    fontWeight: 'bold',
-  },
-  passwordContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: height * 0.02,
-  },
-  passwordInput: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 10,
-    padding: height * 0.015,
-    fontSize: width * 0.045,
-    color: '#000',
-  },
-  eyeButton: {
-    position: 'absolute',
-    right: width * 0.03,
-    padding: width * 0.02,
-  },
-  eyeIcon: {
-    fontSize: width * 0.05,
-  },
-});

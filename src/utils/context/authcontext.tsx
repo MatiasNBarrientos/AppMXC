@@ -1,18 +1,12 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 
 interface AuthContextData {
+  signIn: (userData: any) => Promise<void>;
+  signOut: () => Promise<void>;
   isAuthenticated: boolean;
   loading: boolean;
-  signIn: () => Promise<void>;
-  signOut: () => Promise<void>;
-  userData: UserData | null;
-}
-
-interface UserData {
-  nombre: string;
-  username: string;
-  email: string;
+  userData: any | null;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -20,7 +14,7 @@ const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [userData, setUserData] = useState<UserData | null>(null);
+  const [userData, setUserData] = useState<any>(null);
 
   useEffect(() => {
     loadStorageData();
@@ -43,12 +37,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }
 
-  async function signIn(): Promise<void> {
+  async function signIn(data: any): Promise<void> {
     try {
+      await AsyncStorage.setItem('userData', JSON.stringify(data));
       await AsyncStorage.setItem('isLoggedIn', 'true');
+      setUserData(data);
       setIsAuthenticated(true);
     } catch (error) {
-      console.error('Error durante el inicio de sesión:', error);
+      console.error('Error en signIn:', error);
       throw error;
     }
   }
@@ -65,7 +61,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, loading, signIn, signOut, userData }}>
+    <AuthContext.Provider 
+      value={{ 
+        isAuthenticated, 
+        loading, 
+        signIn, 
+        signOut,
+        userData 
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

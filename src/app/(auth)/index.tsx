@@ -1,86 +1,111 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Image } from 'react-native';
-import { useRouter } from 'expo-router';
+import { View, Text, SafeAreaView, StyleSheet, Image, ActivityIndicator, useColorScheme } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import imagePath from '@/src/constants/imagePath';
+import { useDynamicStyles, colors } from '@/src/styles/globalStyles';
+import { useFonts, RuslanDisplay_400Regular } from '@expo-google-fonts/ruslan-display';
+import { router } from 'expo-router';
+import { moderateScale } from 'react-native-size-matters';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '@/src/utils/context/authcontext';
 
-const { width, height } = Dimensions.get('window'); // Obtén las dimensiones de la pantalla
+const Auth = () => {
+  const [fontsLoaded] = useFonts({
+    RuslanDisplay_400Regular,
+  });
 
-export default function IndexAuth() {
-  const router = useRouter();
+  const systemColorScheme = useColorScheme();
+  const [isDarkMode] = useState(systemColorScheme === 'dark');
+  const [isLoading, setIsLoading] = useState(true);
+  const { signIn, isAuthenticated } = useAuth();
+
+  const dynamicStyles = useDynamicStyles();
+  const themeColors = isDarkMode ? colors.dark : colors.light;
+
+  const checkAuthStatus = async () => {
+    try {
+      const [userData, isLoggedIn, userRole] = await Promise.all([
+        AsyncStorage.getItem('userData'),
+        AsyncStorage.getItem('isLoggedIn'),
+        AsyncStorage.getItem('userRole'),
+      ]);
+
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      if (userData && isLoggedIn === 'true') {
+        const parsedUserData = JSON.parse(userData);
+        await signIn(parsedUserData);
+
+        if (userRole === 'buyer') {
+          router.replace('/(buyer)');
+        } else if (userRole === 'seller') {
+          router.replace('/(seller)');
+        } else {
+          router.replace('/(auth)/welcome');
+        }
+      } else {
+        await Promise.all([
+          AsyncStorage.removeItem('userData'),
+          AsyncStorage.removeItem('isLoggedIn'),
+          AsyncStorage.removeItem('userRole'),
+        ]);
+        router.replace('/(auth)/welcome');
+      }
+    } catch (error) {
+      console.error('Error al verificar autenticación:', error);
+      router.replace('/(auth)/welcome');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
+  useEffect(() => {
+    if (fontsLoaded) {
+      checkAuthStatus();
+    }
+    // Añadir isAuthenticated como dependencia
+  }, [fontsLoaded, isAuthenticated]);
+
+  const styles = StyleSheet.create({
+    MelodyText: {
+      fontSize: moderateScale(30),
+      color: themeColors.primary,
+      textAlign: 'center',
+      fontFamily: 'RuslanDisplay_400Regular',
+    },
+    FromText: {
+      fontSize: moderateScale(12),
+      color: themeColors.secondary,
+    },
+    TeamText: {
+      fontSize: moderateScale(15),
+      fontWeight: 'bold',
+      color: themeColors.secondary,
+    },
+  });
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>SELL AND BUY BEATS</Text>
-      <Image
-        source={require('../../assets/record.png')} // Asegúrate de que la ruta sea correcta
-        style={styles.image}
-      />
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={[styles.button, styles.createAccountButton]}
-          onPress={() => router.push('/(auth)/register')}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.createAccountText}>Create a new account</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.button, styles.signInButton]}
-          onPress={() => router.push('/(auth)/login')}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.signInText}>Sign in</Text>
-        </TouchableOpacity>
+    <SafeAreaView style={[dynamicStyles.container, { backgroundColor: themeColors.background }]}>
+      <View style={dynamicStyles.header}></View>
+      <View style={dynamicStyles.body}>
+        <Text style={styles.MelodyText}>MelodyXChange</Text>
+        <Image source={imagePath.logo} style={dynamicStyles.logoStyle} resizeMode="contain" />
       </View>
-    </View>
+      <View style={dynamicStyles.footer}>
+        {isLoading ? (
+          <>
+            <ActivityIndicator size={moderateScale(48)} color={themeColors.primary} />
+            <Text style={styles.TeamText}>Loading...</Text>
+          </>
+        ) : (
+          <>
+            <Text style={styles.FromText}>Made with ❤️ by</Text>
+            <Text style={styles.TeamText}>MXC TEAM</Text>
+          </>
+        )}
+      </View>
+    </SafeAreaView>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    paddingHorizontal: width * 0.05, // 5% del ancho de la pantalla
-    paddingVertical: height * 0.02, // 2% del alto de la pantalla
-  },
-  title: {
-    fontSize: width * 0.06, // 6% del ancho de la pantalla
-    fontWeight: 'bold',
-    color: '#000',
-    marginBottom: height * 0.03,
-    textAlign: 'center',
-  },
-  image: {
-    width: width * 0.8, // 80% del ancho de la pantalla
-    height: height * 0.3, // 30% del alto de la pantalla
-    borderRadius: 15,
-    marginBottom: height * 0.04,
-  },
-  buttonContainer: {
-    width: '100%',
-    alignItems: 'center',
-    gap: height * 0.02, // Espaciado entre botones basado en el alto de la pantalla
-  },
-  button: {
-    width: width * 0.8, // 80% del ancho de la pantalla
-    paddingVertical: height * 0.015, // 1.5% del alto de la pantalla
-    borderRadius: 25,
-    alignItems: 'center',
-  },
-  createAccountButton: {
-    backgroundColor: '#6A0DAD', // Púrpura oscuro
-  },
-  signInButton: {
-    backgroundColor: '#000', // Negro
-  },
-  createAccountText: {
-    color: '#fff', // Blanco
-    fontSize: width * 0.045,
-    fontWeight: 'bold',
-  },
-  signInText: {
-    color: '#fff', // Blanco
-    fontSize: width * 0.045,
-    fontWeight: 'bold',
-  },
-});
+export default Auth;
