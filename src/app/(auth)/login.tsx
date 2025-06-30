@@ -2,9 +2,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Crypto from 'expo-crypto';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Alert, Dimensions, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Dimensions, Text, TextInput, TouchableOpacity, View, KeyboardAvoidingView, Platform } from 'react-native';
 import { useAuth } from '../../utils/context/authcontext';
-import { useDynamicStyles,getThemeColors } from '@/src/styles/globalStyles';
+import { useDynamicStyles, getThemeColors } from '@/src/styles/globalStyles';
 import { moderateScale, verticalScale } from 'react-native-size-matters';
 
 const { width, height } = Dimensions.get('window');
@@ -81,71 +81,76 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={[dynamicStyles.container, dynamicStyles.loginContainer]}>
-      <Text style={[dynamicStyles.title, dynamicStyles.loginTitle]}>
-        BIENVENIDO DE VUELTA!
-      </Text>
-      <Text style={[dynamicStyles.description, dynamicStyles.loginSubtitle]}>
-        Inicia sesión para continuar
-      </Text>
-      
-      <TextInput
-        style={[
-          dynamicStyles.input,
-          !isEmailValid && dynamicStyles.inputError,
-          { color: dynamicStyles.themeColors.text }
-        ]}
-        placeholder="Correo electrónico"
-        placeholderTextColor={dynamicStyles.themeColors.secondary}
-        value={email}
-        onChangeText={handleEmailChange}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-      
-      {!isEmailValid && (
-        <Text style={[dynamicStyles.errorText, { color: 'red' }]}>
-          Formato de correo inválido
+    <KeyboardAvoidingView 
+      style={{ flex: 1 }} 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <View style={[dynamicStyles.container, dynamicStyles.loginContainer]}>
+        <Text style={[dynamicStyles.title, dynamicStyles.loginTitle]}>
+          BIENVENIDO DE VUELTA!
         </Text>
-      )}
-      
-      <View style={dynamicStyles.passwordContainer}>
+        <Text style={[dynamicStyles.description, dynamicStyles.loginSubtitle]}>
+          Inicia sesión para continuar
+        </Text>
+        
         <TextInput
           style={[
             dynamicStyles.input,
+            !isEmailValid && dynamicStyles.inputError,
             { color: dynamicStyles.themeColors.text }
           ]}
-          placeholder="Contraseña"
+          placeholder="Correo electrónico"
           placeholderTextColor={dynamicStyles.themeColors.secondary}
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry={!showPassword}
+          value={email}
+          onChangeText={handleEmailChange}
+          keyboardType="email-address"
           autoCapitalize="none"
         />
         
-        <TouchableOpacity
-          style={dynamicStyles.showPasswordButton}
-          onPress={() => setShowPassword(!showPassword)}
+        {!isEmailValid && (
+          <Text style={[dynamicStyles.errorText, { color: 'red' }]}>
+            Formato de correo inválido
+          </Text>
+        )}
+        
+        <View style={dynamicStyles.passwordContainer}>
+          <TextInput
+            style={[
+              dynamicStyles.input,
+              { color: dynamicStyles.themeColors.text }
+            ]}
+            placeholder="Contraseña"
+            placeholderTextColor={dynamicStyles.themeColors.secondary}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!showPassword}
+            autoCapitalize="none"
+          />
+          
+          <TouchableOpacity
+            style={dynamicStyles.showPasswordButton}
+            onPress={() => setShowPassword(!showPassword)}
+          >
+            <Text style={[dynamicStyles.showPasswordIcon, { color: dynamicStyles.themeColors.text }]}>
+              {showPassword ? '👁️' : '👁️‍🗨️'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity 
+          style={[dynamicStyles.button, { marginTop: verticalScale(20) }]}
+          onPress={handleLogin}
         >
-          <Text style={[dynamicStyles.showPasswordIcon, { color: dynamicStyles.themeColors.text }]}>
-            {showPassword ? '👁️' : '👁️‍🗨️'}
+          <Text style={dynamicStyles.buttonText}>Iniciar Sesión</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
+          <Text style={[dynamicStyles.textCenter, { marginTop: verticalScale(15) }]}>
+            ¿No tienes una cuenta?{' '}
+            <Text style={dynamicStyles.link}>Regístrate</Text>
           </Text>
         </TouchableOpacity>
       </View>
-
-      <TouchableOpacity 
-        style={[dynamicStyles.button, { marginTop: verticalScale(20) }]}
-        onPress={handleLogin}
-      >
-        <Text style={dynamicStyles.buttonText}>Iniciar Sesión</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
-        <Text style={[dynamicStyles.textCenter, { marginTop: verticalScale(15) }]}>
-          ¿No tienes una cuenta?{' '}
-          <Text style={dynamicStyles.link}>Regístrate</Text>
-        </Text>
-      </TouchableOpacity>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
