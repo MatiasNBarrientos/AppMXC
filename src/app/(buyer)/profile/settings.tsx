@@ -23,7 +23,7 @@ const PerfilSettings = () => {
     }
   };
 
-  // Actualizar las rutas de navegación
+  
   const handleChangePassword = () => {
     router.push('/profile/password');
   };
@@ -36,8 +36,7 @@ const PerfilSettings = () => {
       <Text style={[dynamicStyles.title, { marginBottom: verticalScale(20) }]}>
         Configuración
       </Text>
-
-      {/* Sección de Perfil */}
+      
       <View style={styles.section}>
         <Text style={[dynamicStyles.textMedium, { marginBottom: verticalScale(10) }]}>
           Perfil
@@ -55,8 +54,6 @@ const PerfilSettings = () => {
           <Text style={dynamicStyles.textMedium}>Cambiar Contraseña</Text>
         </TouchableOpacity>
       </View>
-
-      {/* Sección de Preferencias */}
       <View style={styles.section}>
         <Text style={[dynamicStyles.textMedium, { marginBottom: verticalScale(10) }]}>
           Preferencias
@@ -80,8 +77,6 @@ const PerfilSettings = () => {
           />
         </View>
       </View>
-
-      {/* Botón de Cerrar Sesión */}
       <TouchableOpacity 
         style={[dynamicStyles.button, { marginTop: verticalScale(30) }]}
         onPress={handleSignOut}

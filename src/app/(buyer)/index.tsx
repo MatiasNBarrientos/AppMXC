@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
     zIndex: 100,
     width: moderateScale(54),
     height: moderateScale(54),
-    borderRadius: moderateScale(10), // Puedes dejarlo pequeño para esquinas levemente redondeadas, o poner 0 para cuadrado puro
+    borderRadius: moderateScale(10), 
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 6,
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    backgroundColor: undefined, // El color se aplica desde el componente
+    backgroundColor: undefined, 
   },
   fabBadge: {
     position: 'absolute',

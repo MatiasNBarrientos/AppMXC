@@ -10,7 +10,7 @@ export default function HomeScreen() {
   const dynamicStyles = useDynamicStyles();
   const router = useRouter();
 
-  // Simulación de saldo del usuario (puedes traerlo de contexto o props)
+  
   const [balance] = useState(1500.75);
 
   const renderBeatCard = (beat: Beat) => (

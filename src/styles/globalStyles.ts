@@ -4,29 +4,29 @@ import { moderateScale, verticalScale } from 'react-native-size-matters';
 export const colors = {
   light: {
     background: '#FFFFFF',
-    background2: '#BFBFBF', // Fondo claro
-    primary: '#9918B3', // Morado (color principal)
-    secondary: '#CE09F7', // Púrpura eléctrico
-    accent: '#28C7EC', // Azul cielo vivo
-    text: '#000', // Texto oscuro
+    background2: '#BFBFBF', 
+    primary: '#9918B3', 
+    secondary: '#CE09F7', 
+    accent: '#28C7EC', 
+    text: '#000', 
   },
   dark: {
     background: '#000',
-    background2:'#180D1A', // Fondo oscuro actualizado
-    primary: '#BB86FC', // Morado más brillante
-    secondary: '#CE09F7', // Púrpura eléctrico brillante
-    accent: '#40E0FD', // Azul cielo más brillante
-    text: '#FFFFFF', // Texto claro
+    background2:'#180D1A', 
+    primary: '#BB86FC', 
+    secondary: '#CE09F7', 
+    accent: '#40E0FD', 
+    text: '#FFFFFF', 
   },
 };
 
-// Hook para obtener los colores según el tema
+
 export function getThemeColors() {
   const colorScheme = useColorScheme();
   return colorScheme === 'dark' ? colors.dark : colors.light;
 }
 
-// Hook para los estilos dinámicos
+
 export function useDynamicStyles() {
   const themeColors = getThemeColors();
 
@@ -54,7 +54,7 @@ export function useDynamicStyles() {
     },
     textCenter: {
       textAlign: 'center',
-      color: themeColors.text, // Texto dinámico
+      color: themeColors.text, 
     },
     footer: {
       alignItems: 'center',
@@ -68,7 +68,7 @@ export function useDynamicStyles() {
     buttonContainer: {
       width: '100%',
       alignItems: 'center',
-      gap: verticalScale(15), // Espaciado entre botones
+      gap: verticalScale(15), 
       marginTop: verticalScale(20),
     },
     button: {
@@ -127,7 +127,7 @@ export function useDynamicStyles() {
       width: moderateScale(100),
       height: moderateScale(100),
     },
-    // Estilos para inputs
+    
     input: {
       borderWidth: 1,
       borderColor: themeColors.secondary,
@@ -174,7 +174,7 @@ export function useDynamicStyles() {
       fontSize: moderateScale(16),
       marginBottom: verticalScale(30),
     },
-    // Estilo base para textos
+    
     baseText: {
       color: themeColors.text,
       fontSize: moderateScale(16),
@@ -211,6 +211,6 @@ export function useDynamicStyles() {
 
   return {
     ...styles,
-    themeColors, // Exportamos themeColors junto con los estilos
+    themeColors, 
   };
 }

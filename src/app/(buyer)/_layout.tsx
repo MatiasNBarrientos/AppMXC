@@ -1,4 +1,3 @@
-// app/buyer/_layout.tsx
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useDynamicStyles } from '@/src/styles/globalStyles';

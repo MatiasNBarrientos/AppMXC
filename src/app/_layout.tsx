@@ -50,7 +50,7 @@ function RootLayoutNav() {
     checkAuthentication();
   }, []);
 
-  // Redirige cuando todo está listo y montado
+  
   useEffect(() => {
     if (!loading && !checking && logueadoAnteriormente !== null) {
       if (isAuthenticated) {
@@ -67,7 +67,7 @@ function RootLayoutNav() {
     }
   }, [loading, checking, isAuthenticated, logueadoAnteriormente, role]);
 
-  // Pantalla de carga mientras se verifica el estado
+  
   if (loading || checking || logueadoAnteriormente === null) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -76,7 +76,7 @@ function RootLayoutNav() {
     );
   }
 
-  // Muy importante: siempre renderiza <Stack /> para evitar el error
+  
   return (
     <CartProvider>
       <Stack screenOptions={{ 

@@ -6,8 +6,8 @@ import { getThemeColors } from '@/src/styles/globalStyles';
 import { UserStorage } from '@/src/utils/storage/storage';
 
 export default function ChangePasswordScreen() {
-  const colorScheme = useColorScheme(); // Obtener el esquema de color del sistema
-  const themeColors = getThemeColors(); // Pasar el esquema a getThemeColors
+  const colorScheme = useColorScheme();
+  const themeColors = getThemeColors(); 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
@@ -87,7 +87,6 @@ export default function ChangePasswordScreen() {
   };
 
   useEffect(() => {
-    // Este efecto se ejecutará cuando cambie el esquema de color
     console.log('Color scheme changed:', colorScheme);
   }, [colorScheme]);
 
@@ -250,7 +249,7 @@ const styles = StyleSheet.create({
   },
 });
 
-// Función auxiliar para obtener el texto del requisito
+
 const getRequirementText = (key: string) => {
   const texts = {
     length: 'Mínimo 8 caracteres',

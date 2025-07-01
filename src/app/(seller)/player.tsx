@@ -70,7 +70,6 @@ export default function PlayerScreen() {
     }
   };
 
-  // Limpieza cuando cambia el beat (id)
   useEffect(() => {
     return () => {
       if (soundRef.current) {
@@ -113,7 +112,7 @@ export default function PlayerScreen() {
       <Text style={[styles.info, { color: dynamicStyles.themeColors.text }]}>BPM: {beat.bpm}</Text>
       <Text style={[styles.info, { color: dynamicStyles.themeColors.text }]}>Escala: {beat.scale}</Text>
 
-      {/* Barra de progreso */}
+      
       <View style={styles.progressContainer}>
         <Text style={[styles.time, { color: dynamicStyles.themeColors.text }]}>{formatTime(position)}</Text>
         <Slider
@@ -130,7 +129,7 @@ export default function PlayerScreen() {
         <Text style={[styles.time, { color: dynamicStyles.themeColors.text }]}>{formatTime(duration)}</Text>
       </View>
 
-      {/* Botón de reproducción */}
+      
       <TouchableOpacity
         style={[
           styles.audioButton,

@@ -153,8 +153,8 @@ const styles = StyleSheet.create({
     paddingVertical: verticalScale(14),
     alignItems: 'center',
     width: '80%',
-    elevation: 3, // sombra Android
-    shadowColor: '#000', // sombra iOS
+    elevation: 3, 
+    shadowColor: '#000', 
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 4,

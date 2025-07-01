@@ -1,12 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Claves para el almacenamiento
+
 const StorageKeys = {
   USER_DATA: 'userData',
   IS_LOGGED_IN: 'isLoggedIn',
 };
 
-// Interfaz para los datos del usuario
+
 interface UserData {
   nombre: string;
   username: string;
@@ -14,9 +14,9 @@ interface UserData {
   password: string;
 }
 
-// Funciones para gestionar el almacenamiento de datos del usuario
+
 export const UserStorage = {
-  // Guardar datos del usuario
+  
   saveUserData: async (userData: UserData): Promise<void> => {
     try {
       await AsyncStorage.setItem(StorageKeys.USER_DATA, JSON.stringify(userData));
@@ -26,7 +26,7 @@ export const UserStorage = {
     }
   },
 
-  // Obtener datos del usuario
+  
   getUserData: async (): Promise<UserData | null> => {
     try {
       const data = await AsyncStorage.getItem(StorageKeys.USER_DATA);
@@ -37,7 +37,7 @@ export const UserStorage = {
     }
   },
 
-  // Actualizar datos del usuario
+  
   updateUserData: async (newData: Partial<UserData>): Promise<void> => {
     try {
       const currentData = await UserStorage.getUserData();
@@ -51,7 +51,7 @@ export const UserStorage = {
     }
   },
 
-  // Eliminar datos del usuario
+  
   removeUserData: async (): Promise<void> => {
     try {
       await AsyncStorage.removeItem(StorageKeys.USER_DATA);
@@ -61,7 +61,7 @@ export const UserStorage = {
     }
   },
 
-  // Gestionar el estado de inicio de sesión
+  
   setLoggedIn: async (isLoggedIn: boolean): Promise<void> => {
     try {
       await AsyncStorage.setItem(StorageKeys.IS_LOGGED_IN, JSON.stringify(isLoggedIn));
@@ -81,7 +81,7 @@ export const UserStorage = {
     }
   },
 
-  // Cambiar contraseña del usuario
+  
   changePassword: async (oldPassword: string, newPassword: string): Promise<boolean> => {
     try {
       const userData = await UserStorage.getUserData();
@@ -89,12 +89,12 @@ export const UserStorage = {
         throw new Error('No se encontraron datos del usuario');
       }
 
-      // Verificar que la contraseña antigua coincida
+      
       if (userData.password !== oldPassword) {
         return false;
       }
 
-      // Actualizar la contraseña
+      
       await UserStorage.updateUserData({
         ...userData,
         password: newPassword

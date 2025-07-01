@@ -66,7 +66,7 @@ export default function CreateBeat() {
       return;
     }
 
-    // Aquí iría la lógica para subir el beat
+    
     console.log('Datos del beat:', {
       ...beatData,
       price: price,

@@ -60,8 +60,7 @@ export default function ProfileScreen() {
       if (!result.canceled) {
         const newImageUri = result.assets[0].uri;
         setProfileImage({ uri: newImageUri });
-        
-        // Guardar la URI de la imagen en AsyncStorage
+
         try {
           await AsyncStorage.setItem('profileImage', newImageUri);
         } catch (error) {
@@ -74,7 +73,7 @@ export default function ProfileScreen() {
     }
   };
 
-  // Cargar la imagen al iniciar
+
   useEffect(() => {
     const loadProfileImage = async () => {
       try {
@@ -102,7 +101,7 @@ export default function ProfileScreen() {
           onPress: async () => {
             try {
               await signOut();
-              router.push('/(auth)/welcome'); // Cambiado de /start a /welcome
+              router.push('/(auth)/welcome');  
             } catch (error) {
               console.error('Error al cerrar sesión:', error);
               Alert.alert('Error', 'No se pudo cerrar la sesión');
@@ -169,7 +168,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: verticalScale(50),
-    paddingBottom: verticalScale(90), // Ajustado para la barra inferior
+    paddingBottom: verticalScale(90),
   },
   header: {
     flexDirection: 'row',

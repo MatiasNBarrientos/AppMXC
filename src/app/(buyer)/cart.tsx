@@ -3,7 +3,7 @@ import React from 'react';
 import { useCart } from '../../context/CartContext';
 import { useDynamicStyles } from '@/src/styles/globalStyles';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons'; // Agrega este import
+import { Ionicons } from '@expo/vector-icons'; 
 
 export default function CartScreen() {
   const { cartItems, removeFromCart } = useCart();
@@ -14,7 +14,7 @@ export default function CartScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: dynamicStyles.themeColors.background }]}>
-      {/* Flecha para volver */}
+      
       <TouchableOpacity
         style={{ position: 'absolute', top: 48, left: 16, zIndex: 10 }}
         onPress={() => router.replace('/(buyer)')}

@@ -63,7 +63,7 @@ const Auth = () => {
     if (fontsLoaded) {
       checkAuthStatus();
     }
-    // Añadir isAuthenticated como dependencia
+    
   }, [fontsLoaded, isAuthenticated]);
 
   const styles = StyleSheet.create({

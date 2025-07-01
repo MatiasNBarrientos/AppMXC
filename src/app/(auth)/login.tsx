@@ -51,7 +51,7 @@ export default function LoginScreen() {
     }
 
     try {
-      const userDataString = await AsyncStorage.getItem(email); // <-- Buscar por email
+      const userDataString = await AsyncStorage.getItem(email); 
       if (!userDataString) {
         Alert.alert('Error', 'Usuario no encontrado');
         return;
@@ -65,11 +65,11 @@ export default function LoginScreen() {
         Alert.alert('Error', 'Contraseña incorrecta');
         return;
       }
-      // Aquí puedes guardar el usuario logueado y redirigir según el rol
+      
       await AsyncStorage.setItem('userData', JSON.stringify(userData));
       await AsyncStorage.setItem('userRole', userData.role);
       await AsyncStorage.setItem('isLoggedIn', 'true');
-      // Redirigir según rol
+    
       if (userData.role === 'buyer') {
         router.replace('/(buyer)');
       } else if (userData.role === 'seller') {
