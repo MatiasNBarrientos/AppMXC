@@ -66,13 +66,9 @@ export default function BuyerLayout() {
         <Tabs.Screen
           name="cart"
           options={{
-            href: null,
-          }}
-        />
-        <Tabs.Screen
-          name="player"
-          options={{
-            href: null,
+            tabBarIcon: ({ focused, color }) => (
+              <Ionicons name={focused ? 'cart' : 'cart-outline'} size={26} color={color} />
+            ),
           }}
         />
         <Tabs.Screen
@@ -97,6 +93,7 @@ export default function BuyerLayout() {
             href: null,
           }}
         />
+
       </Tabs>
     </CartProvider>
   );

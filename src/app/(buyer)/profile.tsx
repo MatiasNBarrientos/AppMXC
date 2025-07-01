@@ -3,7 +3,6 @@ import React from 'react';
 import { useDynamicStyles } from '@/src/styles/globalStyles';
 import { moderateScale, verticalScale } from 'react-native-size-matters';
 import { Ionicons } from '@expo/vector-icons';
-import { useCart } from '../../context/CartContext'; 
 
 interface Beat {
   id: string;
@@ -23,56 +22,18 @@ const featuredBeats: Beat[] = [
     image: require('@/src/assets/images/placeholder.png'),
     price: 29.99
   },
-  {
-    id: '2',
-    title: 'winter Chill',
-    producer: 'DJ Fresh',
-    genre: 'Pop',
-    image: require('@/src/assets/images/placeholder.png'),
-    price: 19.99
-  },
-  {
-    id: '3',
-    title: 'Urban Beats',
-    producer: 'DJ Fresh',
-    genre: 'Hip-Hop',
-    image: require('@/src/assets/images/placeholder.png'),
-    price: 24.99
-  },
-  {
-    id: '4',
-    title: 'Electronic Dreams',
-    producer: 'DJ Fresh',
-    genre: 'EDM',
-    image: require('@/src/assets/images/placeholder.png'),
-    price: 34.99
-  },
+  // Añade más beats aquí
 ];
-
-
 
 export default function HomeScreen() {
   const dynamicStyles = useDynamicStyles();
-  const { addToCart, cartItems } = useCart();
-
-  const getQuantity = (id: string) => {
-    const item = cartItems.find(i => i.id === id);
-    return item ? item.quantity : 0;
-  };
 
   const renderBeatCard = (beat: Beat) => (
-    <View 
+    <TouchableOpacity 
       key={beat.id}
       style={[styles.beatCard, { backgroundColor: dynamicStyles.themeColors.background }]}
     >
       <Image source={beat.image} style={styles.beatImage} />
-      
-      {getQuantity(beat.id) > 0 && (
-        <View style={styles.quantityBadge}>
-          <Text style={styles.quantityText}>{getQuantity(beat.id)}</Text>
-        </View>
-      )}
-
       <View style={styles.beatInfo}>
         <Text style={[styles.beatTitle, { color: dynamicStyles.themeColors.text }]}>
           {beat.title}
@@ -84,20 +45,16 @@ export default function HomeScreen() {
           <Text style={[styles.beatPrice, { color: dynamicStyles.themeColors.primary }]}>
             ${beat.price}
           </Text>
-
-              <TouchableOpacity 
-                style={styles.cartButton}
-                onPress={() => addToCart({ id: beat.id, title: beat.title, price: beat.price })}
-              >
-                <Ionicons 
-                  name="cart-outline" 
-                  size={24} 
-                  color={dynamicStyles.themeColors.primary} 
-                />
-              </TouchableOpacity>
+          <TouchableOpacity style={styles.playButton}>
+            <Ionicons 
+              name="play" 
+              size={24} 
+              color={dynamicStyles.themeColors.primary} 
+            />
+          </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -124,30 +81,14 @@ export default function HomeScreen() {
             {featuredBeats.map(renderBeatCard)}
           </ScrollView>
         </View>
+
+        {/* Más secciones aquí */}
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-    quantityBadge: {
-    position: 'absolute',
-    top: moderateScale(10),
-    right: moderateScale(10),
-    backgroundColor: 'red',
-    borderRadius: moderateScale(12),
-    width: moderateScale(24),
-    height: moderateScale(24),
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 10,
-  },
-  quantityText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: moderateScale(14),
-  },
-
   container: {
     flex: 1,
   },
@@ -176,7 +117,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: moderateScale(20),
   },
   beatCard: {
-    width: moderateScale(160),
+    width: moderateScale(200),
     marginRight: moderateScale(15),
     borderRadius: moderateScale(10),
     overflow: 'hidden',
@@ -207,7 +148,7 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(18),
     fontWeight: 'bold',
   },
-  cartButton: {
+  playButton: {
     padding: moderateScale(5),
   },
 });
