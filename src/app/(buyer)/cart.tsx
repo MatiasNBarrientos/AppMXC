@@ -3,6 +3,7 @@ import React from 'react';
 import { useCart } from '../../context/CartContext';
 import { useDynamicStyles } from '@/src/styles/globalStyles';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons'; // Agrega este import
 
 export default function CartScreen() {
   const { cartItems, removeFromCart } = useCart();
@@ -13,8 +14,15 @@ export default function CartScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: dynamicStyles.themeColors.background }]}>
+      {/* Flecha para volver */}
+      <TouchableOpacity
+        style={{ position: 'absolute', top: 48, left: 16, zIndex: 10 }}
+        onPress={() => router.replace('/(buyer)')}
+        >
+        <Ionicons name="arrow-back" size={28} color={dynamicStyles.themeColors.text} />
+      </TouchableOpacity>
 
-      <Text style={[styles.title, { color: dynamicStyles.themeColors.text }]}>Tu Carrito</Text>
+      <Text style={[styles.title, { color: dynamicStyles.themeColors.text, marginTop: 16 }]}>Tu Carrito</Text>
 
       <FlatList
         data={cartItems}
@@ -77,21 +85,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   footer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: 16,
+    paddingBottom: 16,
     borderTopWidth: 1,
     borderColor: '#ccc',
   },
   total: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 10,
+    textAlign: 'right',
+    marginBottom: 16,
+    marginRight: 16,
+    marginTop: 8,
   },
   payButton: {
-    padding: 12,
+    padding: 16,
     borderRadius: 8,
     alignItems: 'center',
   },

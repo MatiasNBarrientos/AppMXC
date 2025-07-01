@@ -1,6 +1,6 @@
-import { Tabs, usePathname } from 'expo-router';
+import { Tabs,Stack, usePathname } from 'expo-router';
 import React from 'react';
-import { View, StyleSheet, Platform } from 'react-native';
+import { View, StyleSheet, Platform, StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useDynamicStyles } from '@/src/styles/globalStyles';
 
@@ -88,6 +88,13 @@ const RootNavigation = () => {
           name="player"
           options={{
             href: null,
+          }}
+        />
+        <Tabs.Screen
+          name="wallet"
+          options={{
+            href: null,
+            tabBarStyle: { display: 'none' },
           }}
         />
       <Tabs.Screen

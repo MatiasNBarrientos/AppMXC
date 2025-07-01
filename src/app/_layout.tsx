@@ -4,7 +4,7 @@ import { Stack, useRouter } from 'expo-router';
 import { AuthProvider, useAuth } from '@/src/utils/context/authcontext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CartProvider } from '../context/CartContext';
-
+import { createDefaultUsers } from '../constants/defaultUsers';
 export default function RootLayout() {
   return (
     <AuthProvider>
@@ -19,7 +19,9 @@ function RootLayoutNav() {
   const [role, setRole] = useState<string | null>(null);
   const [logueadoAnteriormente, setLogueadoAnteriormente] = useState<boolean | null>(null);
   const router = useRouter();
-
+  useEffect(() => {
+    createDefaultUsers();
+  }, []);
   useEffect(() => {
     const checkAuthentication = async () => {
       try {
@@ -77,7 +79,10 @@ function RootLayoutNav() {
   // Muy importante: siempre renderiza <Stack /> para evitar el error
   return (
     <CartProvider>
-      <Stack screenOptions={{ headerShown: false }} />
+      <Stack screenOptions={{ 
+        headerShown: false,
+        statusBarHidden: true,
+       }} />
     </CartProvider>
   );
 }

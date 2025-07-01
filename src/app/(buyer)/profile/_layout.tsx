@@ -6,7 +6,7 @@ export default function ProfileLayout() {
     <Stack
       screenOptions={{
         headerShown: false,
-        statusBarHidden: true, 
+        statusBarHidden: true,
       }}
     />
   );

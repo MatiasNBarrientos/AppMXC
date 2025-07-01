@@ -44,7 +44,7 @@ const PerfilSettings = () => {
         </Text>
         <TouchableOpacity 
           style={styles.optionButton}
-          onPress={() => router.push('/(seller)/profile')}
+          onPress={() => router.push('/(main)/profile')}
         >
           <Text style={dynamicStyles.textMedium}>Editar Perfil</Text>
         </TouchableOpacity>

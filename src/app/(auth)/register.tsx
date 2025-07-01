@@ -43,48 +43,6 @@ export default function RegisterScreen() {
   const { signIn } = useAuth();
   const { themeColors, ...dynamicStyles } = useDynamicStyles();
 
-  useEffect(() => {
-    const createDefaultUsers = async () => {
-      const buyerKey = 'comprador@admin.com';
-      const sellerKey = 'vendedor@admin.com';
-      const defaultPassword = 'Admin135#';
-      const hashedPassword = await Crypto.digestStringAsync(
-        Crypto.CryptoDigestAlgorithm.SHA256,
-        defaultPassword
-      );
-
-      const buyerExists = await AsyncStorage.getItem(buyerKey);
-      if (!buyerExists) {
-        await AsyncStorage.setItem(
-          buyerKey,
-          JSON.stringify({
-            nombre: 'Comprador Admin',
-            username: 'comprador',
-            email: buyerKey,
-            password: hashedPassword,
-            role: 'buyer',
-          })
-        );
-      }
-
-      const sellerExists = await AsyncStorage.getItem(sellerKey);
-      if (!sellerExists) {
-        await AsyncStorage.setItem(
-          sellerKey,
-          JSON.stringify({
-            nombre: 'Vendedor Admin',
-            username: 'vendedor',
-            email: sellerKey,
-            password: hashedPassword,
-            role: 'seller',
-          })
-        );
-      }
-    };
-
-    createDefaultUsers();
-  }, []);
-
   const checkPasswordRequirements = (text: string) => {
     setPasswordRequirements({
       length: text.length >= 8,
@@ -277,10 +235,10 @@ export default function RegisterScreen() {
         </View>
 
         <View style={styles.passwordRequirements}>
-          <Text style={[styles.requirement, passwordRequirements.length && styles.requirementMet]}>• Al menos 8 caracteres</Text>
-          <Text style={[styles.requirement, passwordRequirements.uppercase && styles.requirementMet]}>• Una letra mayúscula</Text>
-          <Text style={[styles.requirement, passwordRequirements.number && styles.requirementMet]}>• Un número</Text>
-          <Text style={[styles.requirement, passwordRequirements.special && styles.requirementMet]}>• Un carácter especial</Text>
+          <Text style={[styles.requirement, { color: themeColors.text }, passwordRequirements.length && styles.requirementMet]}>• Al menos 8 caracteres</Text>
+          <Text style={[styles.requirement, { color: themeColors.text }, passwordRequirements.uppercase && styles.requirementMet]}>• Una letra mayúscula</Text>
+          <Text style={[styles.requirement, { color: themeColors.text }, passwordRequirements.number && styles.requirementMet]}>• Un número</Text>
+          <Text style={[styles.requirement, { color: themeColors.text }, passwordRequirements.special && styles.requirementMet]}>• Un carácter especial</Text>
         </View>
 
         <View style={styles.passwordContainer}>

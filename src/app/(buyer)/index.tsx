@@ -4,50 +4,8 @@ import { useDynamicStyles } from '@/src/styles/globalStyles';
 import { moderateScale, verticalScale } from 'react-native-size-matters';
 import { Ionicons } from '@expo/vector-icons';
 import { useCart } from '../../context/CartContext'; 
-
-interface Beat {
-  id: string;
-  title: string;
-  producer: string;
-  genre: string;
-  image: any;
-  price: number;
-}
-
-const featuredBeats: Beat[] = [
-  {
-    id: '1',
-    title: 'Summer Vibes',
-    producer: 'DJ Fresh',
-    genre: 'Pop',
-    image: require('@/src/assets/images/placeholder.png'),
-    price: 29.99
-  },
-  {
-    id: '2',
-    title: 'winter Chill',
-    producer: 'DJ Fresh',
-    genre: 'Pop',
-    image: require('@/src/assets/images/placeholder.png'),
-    price: 19.99
-  },
-  {
-    id: '3',
-    title: 'Urban Beats',
-    producer: 'DJ Fresh',
-    genre: 'Hip-Hop',
-    image: require('@/src/assets/images/placeholder.png'),
-    price: 24.99
-  },
-  {
-    id: '4',
-    title: 'Electronic Dreams',
-    producer: 'DJ Fresh',
-    genre: 'EDM',
-    image: require('@/src/assets/images/placeholder.png'),
-    price: 34.99
-  },
-];
+import { featuredBeats, Beat } from '@/src/constants/beats';
+import { router } from 'expo-router';
 
 
 
@@ -61,9 +19,10 @@ export default function HomeScreen() {
   };
 
   const renderBeatCard = (beat: Beat) => (
-    <View 
+    <TouchableOpacity
       key={beat.id}
       style={[styles.beatCard, { backgroundColor: dynamicStyles.themeColors.background }]}
+      onPress={() => router.push({ pathname: '/(buyer)/player', params: { id: beat.id } })}
     >
       <Image source={beat.image} style={styles.beatImage} />
       
@@ -97,11 +56,25 @@ export default function HomeScreen() {
               </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
+  const totalQuantity = cartItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
 
   return (
     <View style={[styles.container, { backgroundColor: dynamicStyles.themeColors.background }]}>
+      <TouchableOpacity
+        style={[styles.fab, { backgroundColor: dynamicStyles.themeColors.background }]}
+        onPress={() => router.push('/(buyer)/cart')}
+        activeOpacity={0.8}
+      >
+        <Ionicons name="cart-outline" size={28} color="#fff" />
+        {totalQuantity > 0 && (
+          <View style={styles.fabBadge}>
+            <Text style={styles.fabBadgeText}>{totalQuantity}</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+      
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <Text style={[styles.title, { color: dynamicStyles.themeColors.text }]}>
@@ -111,7 +84,6 @@ export default function HomeScreen() {
             Los mejores beats para tu próximo hit
           </Text>
         </View>
-
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: dynamicStyles.themeColors.text }]}>
             Destacados
@@ -209,5 +181,39 @@ const styles = StyleSheet.create({
   },
   cartButton: {
     padding: moderateScale(5),
+  },
+  fab: {
+    position: 'absolute',
+    top: moderateScale(40),
+    right: moderateScale(24),
+    zIndex: 100,
+    width: moderateScale(54),
+    height: moderateScale(54),
+    borderRadius: moderateScale(10), // Puedes dejarlo pequeño para esquinas levemente redondeadas, o poner 0 para cuadrado puro
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    backgroundColor: undefined, // El color se aplica desde el componente
+  },
+  fabBadge: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    backgroundColor: 'red',
+    borderRadius: 10,
+    minWidth: 18,
+    height: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+  },
+  fabBadgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
 });

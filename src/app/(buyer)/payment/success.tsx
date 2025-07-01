@@ -15,6 +15,7 @@ export default function PaymentSuccessScreen() {
       </Text>
       <TouchableOpacity
         style={[styles.button, { backgroundColor: themeColors.primary }]}
+        onPress={() => router.replace('/(buyer)')}
       >
         <Text style={styles.buttonText}>Volver al inicio</Text>
       </TouchableOpacity>

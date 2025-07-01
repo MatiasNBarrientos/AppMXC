@@ -2,6 +2,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import React from 'react';
 import { useRouter } from 'expo-router';
 import { useDynamicStyles } from '@/src/styles/globalStyles';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function PaymentMethodScreen() {
   const router = useRouter();
@@ -9,6 +10,12 @@ export default function PaymentMethodScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+      <TouchableOpacity
+        style={{ position: 'absolute', top: 40, left: 16, zIndex: 10 }}
+        onPress={() => router.back()}
+      >
+        <Ionicons name="arrow-back" size={28} color={themeColors.text} />
+      </TouchableOpacity>
       <Text style={[styles.title, { color: themeColors.text }]}>Selecciona un método de pago</Text>
 
       <TouchableOpacity
@@ -19,7 +26,7 @@ export default function PaymentMethodScreen() {
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={[styles.button, { backgroundColor: '#009EE3' }]}
+        style={[styles.button, { backgroundColor: themeColors.secondary }]}
         onPress={() => router.push('/(buyer)/payment/processing')}
       >
         <Text style={styles.buttonText}>MercadoPago</Text>
