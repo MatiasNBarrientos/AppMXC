@@ -4,19 +4,19 @@ import { moderateScale, verticalScale } from 'react-native-size-matters';
 export const colors = {
   light: {
     background: '#FFFFFF',
-    background2: '#BFBFBF', 
-    primary: '#9918B3', 
-    secondary: '#CE09F7', 
-    accent: '#28C7EC', 
-    text: '#000', 
+    background2: '#BFBFBF',
+    primary: '#9918B3',
+    secondary: '#CE09F7',
+    accent: '#28C7EC',
+    text: '#000',
   },
   dark: {
     background: '#000',
-    background2:'#180D1A', 
-    primary: '#BB86FC', 
-    secondary: '#CE09F7', 
-    accent: '#40E0FD', 
-    text: '#FFFFFF', 
+    background2:'#180D1A',
+    primary: '#BB86FC',
+    secondary: '#CE09F7',
+    accent: '#40E0FD',
+    text: '#FFFFFF',
   },
 };
 
@@ -54,7 +54,7 @@ export function useDynamicStyles() {
     },
     textCenter: {
       textAlign: 'center',
-      color: themeColors.text, 
+      color: themeColors.text,
     },
     footer: {
       alignItems: 'center',
@@ -68,7 +68,7 @@ export function useDynamicStyles() {
     buttonContainer: {
       width: '100%',
       alignItems: 'center',
-      gap: verticalScale(15), 
+      gap: verticalScale(15),
       marginTop: verticalScale(20),
     },
     button: {
@@ -127,7 +127,7 @@ export function useDynamicStyles() {
       width: moderateScale(100),
       height: moderateScale(100),
     },
-    
+
     input: {
       borderWidth: 1,
       borderColor: themeColors.secondary,
@@ -174,7 +174,7 @@ export function useDynamicStyles() {
       fontSize: moderateScale(16),
       marginBottom: verticalScale(30),
     },
-    
+
     baseText: {
       color: themeColors.text,
       fontSize: moderateScale(16),
@@ -207,10 +207,34 @@ export function useDynamicStyles() {
     requirementNotMet: {
     color: '#ff3b30',
   },
+    textSection: {
+      fontSize: moderateScale(16),
+      color: themeColors.background2,
+    },
+    backButton: {
+    padding: moderateScale(12),
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "flex-start",
+    },
+    circle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: 'gray',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
   });
 
   return {
     ...styles,
-    themeColors, 
+    themeColors,
   };
 }

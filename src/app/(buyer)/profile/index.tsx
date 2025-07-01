@@ -44,7 +44,7 @@ export default function ProfileScreen() {
   const handleImagePick = async () => {
     try {
       const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      
+
       if (!permissionResult.granted) {
         Alert.alert('Error', 'Necesitamos permiso para acceder a tus fotos');
         return;
@@ -101,7 +101,7 @@ export default function ProfileScreen() {
           onPress: async () => {
             try {
               await signOut();
-              router.push('/(auth)/start'); 
+              router.push('/(auth)/start');
             } catch (error) {
               console.error('Error al cerrar sesión:', error);
               Alert.alert('Error', 'No se pudo cerrar la sesión');
@@ -116,14 +116,14 @@ export default function ProfileScreen() {
     <View style={[styles.container, { backgroundColor: dynamicStyles.themeColors.background }]}>
       <View style={styles.header}>
         <Text style={[styles.title, { color: dynamicStyles.themeColors.text }]}>Mi Perfil</Text>
-        <TouchableOpacity 
-          onPress={() => router.push('/profile/settings')}
+        <TouchableOpacity
+          onPress={() => router.push('/(main)/settings')}
           style={styles.settingsButton}
         >
-          <Ionicons 
-            name="settings-outline" 
-            size={24} 
-            color={dynamicStyles.themeColors.text} 
+          <Ionicons
+            name="settings-outline"
+            size={24}
+            color={dynamicStyles.themeColors.text}
           />
         </TouchableOpacity>
       </View>
@@ -154,8 +154,8 @@ export default function ProfileScreen() {
         </View>
       </View>
 
-      <TouchableOpacity 
-        style={[styles.button, { backgroundColor: dynamicStyles.themeColors.primary }]} 
+      <TouchableOpacity
+        style={[styles.button, { backgroundColor: dynamicStyles.themeColors.primary }]}
         onPress={handleLogout}
       >
         <Text style={styles.buttonText}>Cerrar Sesión</Text>
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: verticalScale(50),
-    paddingBottom: verticalScale(90), 
+    paddingBottom: verticalScale(90),
   },
   header: {
     flexDirection: 'row',
